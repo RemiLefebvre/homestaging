@@ -18,10 +18,6 @@ function pick(base: BaseInterior) {
 
 <template>
   <div>
-    <h2 class="text-xl font-semibold mb-4">
-      1. Choisis un intérieur de base
-    </h2>
-
     <UAlert
       v-if="items.length === 0"
       color="warning"

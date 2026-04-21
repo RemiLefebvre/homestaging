@@ -3,7 +3,7 @@ import type { BaseInterior } from '~~/shared/types/base-interior'
 
 useHead({ title: 'Home staging — générateur d’intérieurs' })
 
-const { state, selectBase, generateFromBase } = useImageGenerator()
+const { state, selectBase, generateFromBase, reset } = useImageGenerator()
 const { messageFor, extractCode } = useGenerationError()
 
 const { data, error } = await useFetch<{ items: BaseInterior[] }>('/api/base-interiors')
@@ -26,15 +26,6 @@ function onFirstPrompt(prompt: string) {
 <template>
   <div class="min-h-screen bg-neutral-50 dark:bg-neutral-950">
     <div class="max-w-5xl mx-auto px-4 py-10">
-      <header class="mb-10">
-        <h1 class="text-3xl font-bold mb-2">
-          Home Staging
-        </h1>
-        <p class="text-neutral-600 dark:text-neutral-400">
-          Choisis un intérieur vide, décris ton agencement, itère à l’infini.
-        </p>
-      </header>
-
       <UAlert
         v-if="loadError"
         class="mb-6"
@@ -55,14 +46,11 @@ function onFirstPrompt(prompt: string) {
 
       <!-- Étape 2 : premier prompt -->
       <div v-else-if="!state.currentImageUrl && !state.loading" class="flex flex-col gap-6">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold">
-            2. Décris l’agencement souhaité
-          </h2>
+        <div class="flex items-center justify-end">
           <UButton
             variant="ghost"
             icon="i-lucide-arrow-left"
-            @click="selectBase(state.selectedBase)"
+            @click="reset()"
           >
             Changer de base
           </UButton>

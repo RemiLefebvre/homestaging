@@ -1,8 +1,10 @@
 import type { BaseInterior } from '~~/shared/types/base-interior'
 
-interface HistoryEntry {
+interface HistoryNode {
+  id: string
   url: string
   prompt: string
+  parentId: string | null
 }
 
 interface GenerationError {
@@ -14,7 +16,8 @@ interface GenerationError {
 interface GeneratorState {
   selectedBase: BaseInterior | null
   currentImageUrl: string | null
-  history: HistoryEntry[]
+  nodes: HistoryNode[]
+  currentId: string | null
   loading: boolean
   error: GenerationError | null
   lastPrompt: string | null
@@ -24,7 +27,8 @@ function createState(): GeneratorState {
   return {
     selectedBase: null,
     currentImageUrl: null,
-    history: [],
+    nodes: [],
+    currentId: null,
     loading: false,
     error: null,
     lastPrompt: null,
@@ -35,11 +39,23 @@ export function useImageGenerator() {
   const state = useState<GeneratorState>('image-generator', createState)
   const { messageFor, extractCode } = useGenerationError()
 
+  const currentPathIds = computed<Set<string>>(() => {
+    const ids = new Set<string>()
+    let id: string | null = state.value.currentId
+    while (id) {
+      ids.add(id)
+      const node = state.value.nodes.find(n => n.id === id)
+      id = node?.parentId ?? null
+    }
+    return ids
+  })
+
   function selectBase(base: BaseInterior) {
     if (state.value.loading) return
     state.value.selectedBase = base
     state.value.currentImageUrl = null
-    state.value.history = []
+    state.value.nodes = []
+    state.value.currentId = null
     state.value.error = null
     state.value.lastPrompt = null
   }
@@ -49,12 +65,12 @@ export function useImageGenerator() {
     state.value = createState()
   }
 
-  function revertTo(index: number) {
+  function revertTo(id: string) {
     if (state.value.loading) return
-    const entry = state.value.history[index]
-    if (!entry) return
-    state.value.currentImageUrl = entry.url
-    state.value.history = state.value.history.slice(0, index + 1)
+    const node = state.value.nodes.find(n => n.id === id)
+    if (!node) return
+    state.value.currentId = id
+    state.value.currentImageUrl = node.url
     state.value.error = null
   }
 
@@ -77,8 +93,10 @@ export function useImageGenerator() {
         baseId: base.id,
         prompt: trimmed,
       })
+      const node: HistoryNode = { id: crypto.randomUUID(), url: imageUrl, prompt: trimmed, parentId: null }
+      state.value.nodes = [node]
+      state.value.currentId = node.id
       state.value.currentImageUrl = imageUrl
-      state.value.history = [{ url: imageUrl, prompt: trimmed }]
     } catch (err) {
       handleError(err)
     } finally {
@@ -101,8 +119,10 @@ export function useImageGenerator() {
         currentImageUrl,
         prompt: trimmed,
       })
+      const node: HistoryNode = { id: crypto.randomUUID(), url: imageUrl, prompt: trimmed, parentId: state.value.currentId }
+      state.value.nodes = [...state.value.nodes, node]
+      state.value.currentId = node.id
       state.value.currentImageUrl = imageUrl
-      state.value.history = [...state.value.history, { url: imageUrl, prompt: trimmed }]
     } catch (err) {
       handleError(err)
     } finally {
@@ -128,6 +148,7 @@ export function useImageGenerator() {
 
   return {
     state: readonly(state),
+    currentPathIds,
     selectBase,
     generateFromBase,
     refine,
