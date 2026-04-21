@@ -3,6 +3,7 @@ const props = defineProps<{
   loading: boolean
   placeholder?: string
   submitLabel?: string
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -29,7 +30,28 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div v-if="compact" class="flex items-center gap-2 flex-1">
+    <UInput
+      v-model="prompt"
+      class="flex-1"
+      size="xl"
+      :placeholder="placeholder ?? 'Décris comment agencer la pièce…'"
+      :disabled="loading"
+      @keydown.enter.prevent="handleSubmit"
+    />
+    <UButton
+      icon="i-lucide-sparkles"
+      size="xl"
+      :loading="loading"
+      :disabled="!canSubmit"
+      color="primary"
+      @click="handleSubmit"
+    >
+      {{ submitLabel ?? 'Générer' }}
+    </UButton>
+  </div>
+
+  <div v-else class="flex flex-col gap-3">
     <UTextarea
       v-model="prompt"
       :placeholder="placeholder ?? 'Décris comment agencer la pièce… (canapé, table, plantes, ambiance…)'"

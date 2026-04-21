@@ -27,24 +27,26 @@ function pick(base: BaseInterior) {
       icon="i-lucide-info"
     />
 
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <UCard
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-neutral-200 dark:bg-neutral-800">
+      <div
         v-for="base in items"
         :key="base.id"
-        class="cursor-pointer transition hover:ring-2 hover:ring-primary-500"
+        class="cursor-pointer overflow-hidden bg-white dark:bg-neutral-900 transition hover:brightness-95 active:brightness-90"
         :class="{ 'opacity-50 cursor-not-allowed': disabled }"
         @click="pick(base)"
       >
         <img
           :src="`/base-interiors/${base.filename}`"
           :alt="base.label"
-          class="w-full aspect-video object-cover rounded-md mb-3"
+          class="w-full aspect-[4/3] object-cover"
         >
-        <h3 class="font-medium">{{ base.label }}</h3>
-        <p v-if="base.description" class="text-sm text-neutral-500 mt-1">
-          {{ base.description }}
-        </p>
-      </UCard>
+        <div class="px-4 py-3">
+          <h3 class="font-medium">{{ base.label }}</h3>
+          <p v-if="base.description" class="text-sm text-neutral-500 mt-1">
+            {{ base.description }}
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
