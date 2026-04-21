@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kill 66664 66791 66792)",
+      "Bash(pnpm dev *)",
+      "Bash(pnpm add *)"
+    ]
+  }
+}

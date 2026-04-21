@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "label": "Studio avec baie vitrée",
+    "filename": "1.png",
+    "description": "Studio 25m², grande baie sud, parquet clair"
+  },
+  {
+    "id": "2",
+    "label": "T2 salon lumineux",
+    "filename": "2.png",
+    "description": "Salon 30m², murs blancs, 2 fenêtres"
+  },
+  {
+    "id": "3",
+    "label": "Loft style industriel",
+    "filename": "3.png",
+    "description": "Loft 50m², plafond haut, poutres apparentes"
+  },
+  {
+    "id": "4",
+    "label": "Chambre spacieuse",
+    "filename": "4.png",
+    "description": "Chambre 20m², lumière douce"
+  },
+  {
+    "id": "5",
+    "label": "Open space épuré",
+    "filename": "5.png",
+    "description": "Grand espace 45m², sol gris clair"
+  }
+]
