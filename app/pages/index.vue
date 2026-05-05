@@ -64,16 +64,19 @@ function onFirstPrompt(prompt: string) {
           icon="i-lucide-alert-triangle"
         />
 
-        <div class="h-[10vh] flex items-center gap-3 px-4 border-t border-neutral-200 dark:border-neutral-800">
-          <UButton icon="i-lucide-arrow-left" @click="reset()">
-            Changer de base
-          </UButton>
+        <div class="py-3 border-t border-neutral-200 dark:border-neutral-800">
           <PromptInput
             compact
             :loading="state.loading"
-            class="flex-1"
+            :room-type="state.selectedBase.roomType"
             @submit="onFirstPrompt"
-          />
+          >
+            <template #prefix>
+              <UButton icon="i-lucide-arrow-left" @click="reset()">
+                Changer de base
+              </UButton>
+            </template>
+          </PromptInput>
         </div>
       </div>
 

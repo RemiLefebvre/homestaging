@@ -3,7 +3,13 @@
     "allow": [
       "Bash(kill 66664 66791 66792)",
       "Bash(pnpm dev *)",
-      "Bash(pnpm add *)"
+      "Bash(pnpm add *)",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(curl -s http://localhost:3001/_nuxt/app/components/PromptInput.vue)",
+      "Bash(curl -s \"http://localhost:3001/_nuxt/@fs/Users/remi/Sites/homestaging/app/components/PromptInput.vue\")",
+      "Bash(curl -s \"http://localhost:3001/_nuxt/assets/prompt-suggestions.json?import\")",
+      "Bash(file public/base-interiors/*.png public/base-interiors/*.jpg)",
+      "Bash(grep -E \"^\\(tsx|ts-node\\)$\")"
     ]
   }
 }

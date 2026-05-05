@@ -13,25 +13,14 @@ function nodeClass(id: string) {
 </script>
 
 <template>
-  <div class="flex flex-col gap-6">
-    <div class="flex items-center justify-end">
-      <UButton
-        variant="ghost"
-        icon="i-lucide-rotate-ccw"
-        :disabled="state.loading"
-        @click="reset"
-      >
-        Recommencer
-      </UButton>
-    </div>
-
-    <div class="flex gap-4">
-      <div class="flex-1 relative rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800">
+  <div class="flex flex-col h-screen">
+    <div class="flex-1 min-h-0 flex gap-4 px-4 pt-4">
+      <div class="flex-1 min-w-0 relative rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800">
         <img
           v-if="state.currentImageUrl"
           :src="state.currentImageUrl"
           alt="Intérieur généré"
-          class="w-full object-contain bg-neutral-100 dark:bg-neutral-900"
+          class="w-full h-full object-contain bg-neutral-100 dark:bg-neutral-900"
         >
         <div
           v-if="state.loading"
@@ -42,34 +31,35 @@ function nodeClass(id: string) {
         </div>
       </div>
 
-      <div v-if="state.nodes.length > 1" class="w-36 flex-shrink-0 flex flex-col overflow-hidden">
-        <p class="text-xs font-medium mb-3 text-neutral-500 dark:text-neutral-400 flex-shrink-0">
+      <div v-if="state.nodes.length > 1" class="w-36 shrink-0 flex flex-col overflow-hidden">
+        <p class="text-xs font-medium mb-3 text-neutral-500 dark:text-neutral-400 shrink-0">
           {{ state.nodes.length }} versions
         </p>
         <div class="flex flex-col gap-3 overflow-y-auto flex-1">
-        <button
-          v-for="node in [...state.nodes].reverse()"
-          :key="node.id"
-          class="w-full text-left group"
-          :disabled="state.loading"
-          @click="revertTo(node.id)"
-        >
-          <img
-            :src="node.url"
-            :alt="node.prompt"
-            class="w-full h-20 object-cover rounded border-2 transition"
-            :class="nodeClass(node.id)"
+          <button
+            v-for="node in [...state.nodes].reverse()"
+            :key="node.id"
+            class="w-full text-left group"
+            :disabled="state.loading"
+            @click="revertTo(node.id)"
           >
-          <p class="text-xs mt-1 line-clamp-2 text-neutral-600 dark:text-neutral-400">
-            {{ node.prompt }}
-          </p>
-        </button>
+            <img
+              :src="node.url"
+              :alt="node.prompt"
+              class="w-full h-20 object-cover rounded border-2 transition"
+              :class="nodeClass(node.id)"
+            >
+            <p class="text-xs mt-1 line-clamp-2 text-neutral-600 dark:text-neutral-400">
+              {{ node.prompt }}
+            </p>
+          </button>
         </div>
       </div>
     </div>
 
     <UAlert
       v-if="state.error"
+      class="mx-4 mt-2"
       color="error"
       variant="soft"
       :title="state.error.title"
@@ -80,11 +70,25 @@ function nodeClass(id: string) {
       ]"
     />
 
-    <PromptInput
-      :loading="state.loading"
-      placeholder="Affine l'agencement… (ex : ajoute une grande plante verte près de la fenêtre)"
-      submit-label="Modifier"
-      @submit="onSubmit"
-    />
+    <div class="py-3 border-t border-neutral-200 dark:border-neutral-800 mt-2">
+      <PromptInput
+        compact
+        :loading="state.loading"
+        :room-type="state.selectedBase?.roomType"
+        placeholder="Affine l'agencement… (ex : ajoute une grande plante verte près de la fenêtre)"
+        submit-label="Modifier"
+        @submit="onSubmit"
+      >
+        <template #prefix>
+          <UButton
+            icon="i-lucide-arrow-left"
+            :disabled="state.loading"
+            @click="reset()"
+          >
+            Changer de base
+          </UButton>
+        </template>
+      </PromptInput>
+    </div>
   </div>
 </template>

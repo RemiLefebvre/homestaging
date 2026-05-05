@@ -1,0 +1,59 @@
+{
+  "kitchen": [
+    "Ajoute une cuisine ouverte avec îlot central et tabourets de bar",
+    "Cuisine campagnarde avec table en bois, chaises bistrot et étagères ouvertes",
+    "Cuisine moderne avec façades laquées noires et plan de travail en marbre",
+    "Cuisine scandinave avec bois clair, faïence blanche et plantes aromatiques",
+    "Ajoute un îlot central avec bar et suspensions design en cuivre",
+    "Cuisine industrielle avec inox, briques apparentes et tabourets métal",
+    "Coin repas dans la cuisine avec banc en bois et table ronde",
+    "Cuisine bistrot parisienne avec carrelage métro et étagères en laiton"
+  ],
+  "bedroom": [
+    "Place un lit king size avec tête de lit capitonnée et deux tables de chevet",
+    "Lit double avec textile blanc, commode vintage et grand miroir doré",
+    "Coin enfant avec lit cabane, tipi, tapis moelleux et étagères colorées",
+    "Chambre cosy avec lit en bois, plaids en laine et lampes douces",
+    "Chambre boudoir avec velours, miroir baroque et coiffeuse",
+    "Chambre minimaliste japonaise avec futon, paravent et plantes bambou",
+    "Chambre d'ado avec bureau, étagères ouvertes et déco bohème",
+    "Coin lecture dans la chambre avec fauteuil cosy et liseuse"
+  ],
+  "living": [
+    "Ajoute un canapé d'angle, un buffet et une bibliothèque style Ikea",
+    "Place un grand tapis berbère et un canapé en lin beige avec coussins moelleux",
+    "Mets une table à manger en bois massif avec 6 chaises scandinaves",
+    "Installe un coin lecture avec fauteuil en velours et lampadaire arc",
+    "Canapé en cuir cognac, table basse industrielle et bibliothèque métal noir",
+    "Meuble TV bas, canapé modulable gris et suspension design dorée",
+    "Salon avec cheminée moderne, tapis épais et fauteuils enveloppants",
+    "Salle à manger conviviale avec grande table en chêne et banc en bois"
+  ],
+  "bathroom": [
+    "Salle de bain spa avec marbre, vasque ronde et douche pluie",
+    "Salle de bain scandinave avec bois clair, faïence blanche et plantes",
+    "Salle de bain industrielle avec verrière, métal noir et béton ciré",
+    "Salle de bain bohème avec carrelage zellige, miroir rond et plantes vertes",
+    "Salle de bain moderne avec double vasque, miroir LED et meuble suspendu",
+    "Salle d'eau compacte avec rangements muraux et accessoires noir mat",
+    "Ambiance hammam avec tadelakt, banc en bois et éclairage tamisé",
+    "Salle de bain rétro avec carrelage métro, baignoire sur pieds et laiton"
+  ],
+  "multipurpose": [
+    "Ajoute un bureau en bois clair, une chaise ergonomique et des étagères murales",
+    "Espace polyvalent avec canapé convertible, bureau d'appoint et bibliothèque",
+    "Coin home office avec bureau debout, fauteuil ergonomique et plantes",
+    "Coin atelier avec grande table, étagères de rangement et lumière chaude",
+    "Studio avec lit gigogne, kitchenette compacte et coin repas",
+    "Loft ouvert avec coin salon, salle à manger et zone de travail"
+  ],
+  "common": [
+    "Ajoute des plantes vertes près de la fenêtre",
+    "Style Art déco avec velours bleu nuit, dorures et miroir rond",
+    "Décor bohème avec tapis berbères, coussins ethniques et plantes suspendues",
+    "Style scandinave épuré avec mobilier blanc, bois clair et touches pastel",
+    "Style loft industriel avec briques apparentes, métal noir et cuir vieilli",
+    "Ajoute des rideaux en lin, des coussins moelleux et un éclairage chaud",
+    "Ambiance minimaliste japonaise avec touches de bambou"
+  ]
+}
