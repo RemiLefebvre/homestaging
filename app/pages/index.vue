@@ -14,6 +14,12 @@ const loadError = computed(() => {
   return messageFor(code)
 })
 
+const currentStep = computed<1 | 2 | 3>(() => {
+  if (!state.value.selectedBase) return 1
+  if (!state.value.currentImageUrl) return 2
+  return 3
+})
+
 function onBasePicked(base: BaseInterior) {
   selectBase(base)
 }
@@ -24,47 +30,62 @@ function onFirstPrompt(prompt: string) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-neutral-50 dark:bg-neutral-950">
-    <div class="mx-auto">
+  <main class="relative">
+    <UAlert
+      v-if="loadError"
+      class="max-w-7xl mx-auto mt-4 mx-4 sm:mx-auto sm:px-6"
+      color="error"
+      variant="soft"
+      :title="loadError.title"
+      :description="loadError.hint"
+      icon="i-lucide-alert-triangle"
+    />
+
+    <!-- Étape 1 : sélection de base -->
+    <template v-if="!state.selectedBase">
+      <AppHero :base-count="data?.items?.length ?? 0" />
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+        <div class="mb-6 flex justify-center">
+          <StepIndicator :current="currentStep" />
+        </div>
+        <BaseInteriorPicker
+          :items="data?.items ?? []"
+          :disabled="state.loading"
+          @select="onBasePicked"
+        />
+      </div>
+    </template>
+
+    <!-- Étape 2 : premier prompt (avec ou sans loader) -->
+    <div
+      v-else-if="!state.currentImageUrl"
+      class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100vh-3.5rem)]"
+    >
+      <div class="py-4 flex justify-center">
+        <StepIndicator :current="currentStep" />
+      </div>
+
+      <div class="flex-1 min-h-0 relative rounded-3xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10 shadow-xl shadow-violet-500/5">
+        <img
+          :src="`/base-interiors/${state.selectedBase.filename}`"
+          :alt="state.selectedBase.label"
+          class="w-full h-full object-contain bg-neutral-100 dark:bg-neutral-900"
+        >
+        <ProgressOverlay v-if="state.loading" />
+      </div>
+
       <UAlert
-        v-if="loadError"
-        class="mb-6 mx-4"
+        v-if="state.error"
+        class="mt-3"
         color="error"
         variant="soft"
-        :title="loadError.title"
-        :description="loadError.hint"
+        :title="state.error.title"
+        :description="state.error.hint"
         icon="i-lucide-alert-triangle"
       />
 
-      <!-- Étape 1 : sélection de base -->
-      <BaseInteriorPicker
-        v-if="!state.selectedBase"
-        :items="data?.items ?? []"
-        :disabled="state.loading"
-        @select="onBasePicked"
-      />
-
-      <!-- Étape 2 : premier prompt -->
-      <div v-else-if="!state.currentImageUrl && !state.loading" class="flex flex-col h-screen">
-        <div class="flex-1 min-h-0 p-4">
-          <img
-            :src="`/base-interiors/${state.selectedBase.filename}`"
-            :alt="state.selectedBase.label"
-            class="w-full h-full object-contain rounded-lg bg-neutral-100 dark:bg-neutral-900"
-          >
-        </div>
-
-        <UAlert
-          v-if="state.error"
-          class="mx-4 mb-2"
-          color="error"
-          variant="soft"
-          :title="state.error.title"
-          :description="state.error.hint"
-          icon="i-lucide-alert-triangle"
-        />
-
-        <div class="py-3 border-t border-neutral-200 dark:border-neutral-800">
+      <div class="py-4">
+        <div class="surface-glass-strong rounded-2xl p-3 shadow-2xl shadow-violet-500/5 ring-1 ring-black/5 dark:ring-white/10">
           <PromptInput
             compact
             :loading="state.loading"
@@ -72,32 +93,22 @@ function onFirstPrompt(prompt: string) {
             @submit="onFirstPrompt"
           >
             <template #prefix>
-              <UButton icon="i-lucide-arrow-left" @click="reset()">
-                Changer de base
+              <UButton
+                variant="soft"
+                color="neutral"
+                icon="i-lucide-arrow-left"
+                :disabled="state.loading"
+                @click="reset()"
+              >
+                <span class="hidden sm:inline">Changer de base</span>
               </UButton>
             </template>
           </PromptInput>
         </div>
       </div>
-
-      <!-- Étape 2 en loading (affiche quand même l'image de base + loader) -->
-      <div v-else-if="!state.currentImageUrl && state.loading" class="flex flex-col h-screen">
-        <div class="flex-1 min-h-0 p-4 relative">
-          <img
-            :src="`/base-interiors/${state.selectedBase!.filename}`"
-            :alt="state.selectedBase!.label"
-            class="w-full h-full object-contain rounded-lg bg-neutral-100 dark:bg-neutral-900"
-          >
-          <div class="absolute inset-4 flex flex-col items-center justify-center gap-3 bg-neutral-900/60 backdrop-blur-sm text-white rounded-lg">
-            <UIcon name="i-lucide-loader-2" class="w-10 h-10 animate-spin" />
-            <p class="text-sm font-medium">Génération en cours… (~15-20s)</p>
-          </div>
-        </div>
-        <div class="h-[10vh]" />
-      </div>
-
-      <!-- Étape 3 : édition infinie -->
-      <GeneratedImageView v-else />
     </div>
-  </div>
+
+    <!-- Étape 3 : édition infinie -->
+    <GeneratedImageView v-else />
+  </main>
 </template>

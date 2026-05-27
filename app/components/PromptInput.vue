@@ -50,20 +50,27 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div v-if="compact" class="flex flex-col gap-2 min-w-0">
-    <div v-if="pickedSuggestions.length" class="suggestions-row flex gap-2 overflow-x-auto whitespace-nowrap px-4">
+  <div v-if="compact" class="flex flex-col gap-3 min-w-0">
+    <TransitionGroup
+      v-if="pickedSuggestions.length"
+      tag="div"
+      name="chip"
+      class="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide -mx-1 px-1"
+    >
       <button
-        v-for="suggestion in pickedSuggestions"
+        v-for="(suggestion, i) in pickedSuggestions"
         :key="suggestion"
         type="button"
-        class="shrink-0 text-xs px-3 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        class="shrink-0 text-sm px-3.5 py-1.5 rounded-full ring-1 ring-black/5 dark:ring-white/10 bg-white/80 dark:bg-neutral-900/60 backdrop-blur-sm hover:bg-violet-500/10 hover:ring-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 text-neutral-700 dark:text-neutral-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        :style="{ transitionDelay: `${i * 20}ms` }"
         :disabled="loading"
         @click="applySuggestion(suggestion)"
       >
         {{ suggestion }}
       </button>
-    </div>
-    <div class="flex items-center gap-2 px-4">
+    </TransitionGroup>
+
+    <div class="flex items-center gap-2">
       <slot name="prefix" />
       <UInput
         v-model="prompt"
@@ -73,32 +80,40 @@ function onKeydown(event: KeyboardEvent) {
         :disabled="loading"
         @keydown.enter.prevent="handleSubmit"
       />
-      <UButton
-        icon="i-lucide-sparkles"
-        size="xl"
-        :loading="loading"
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white bg-gradient-brand shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         :disabled="!canSubmit"
-        color="primary"
         @click="handleSubmit"
       >
+        <UIcon
+          :name="loading ? 'i-lucide-loader-2' : 'i-lucide-sparkles'"
+          :class="['h-4 w-4', loading && 'animate-spin']"
+        />
         {{ submitLabel ?? 'Générer' }}
-      </UButton>
+      </button>
     </div>
   </div>
 
   <div v-else class="flex flex-col gap-3">
-    <div v-if="pickedSuggestions.length" class="suggestions-row flex gap-2 overflow-x-auto whitespace-nowrap -mx-1 px-1">
+    <TransitionGroup
+      v-if="pickedSuggestions.length"
+      tag="div"
+      name="chip"
+      class="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide -mx-1 px-1"
+    >
       <button
         v-for="suggestion in pickedSuggestions"
         :key="suggestion"
         type="button"
-        class="shrink-0 text-xs px-3 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        class="shrink-0 text-sm px-3.5 py-1.5 rounded-full ring-1 ring-black/5 dark:ring-white/10 bg-white/80 dark:bg-neutral-900/60 hover:bg-violet-500/10 hover:ring-violet-500/40 hover:text-violet-700 dark:hover:text-violet-300 text-neutral-700 dark:text-neutral-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="loading"
         @click="applySuggestion(suggestion)"
       >
         {{ suggestion }}
       </button>
-    </div>
+    </TransitionGroup>
+
     <UTextarea
       v-model="prompt"
       :placeholder="placeholder ?? 'Décris comment agencer la pièce… (canapé, table, plantes, ambiance…)'"
@@ -107,29 +122,36 @@ function onKeydown(event: KeyboardEvent) {
       autoresize
       @keydown="onKeydown"
     />
+
     <div class="flex items-center justify-between gap-3">
-      <span class="text-xs text-neutral-500">
-        Cmd/Ctrl + Enter pour envoyer
+      <span class="text-xs text-neutral-500 dark:text-neutral-400 inline-flex items-center gap-1.5">
+        <kbd class="rounded-md bg-neutral-200/70 dark:bg-neutral-800 px-1.5 py-0.5 text-[10px] font-mono ring-1 ring-black/5 dark:ring-white/10">⌘ ⏎</kbd>
+        pour envoyer
       </span>
-      <UButton
-        icon="i-lucide-sparkles"
-        :loading="loading"
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white bg-gradient-brand shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         :disabled="!canSubmit"
-        color="primary"
         @click="handleSubmit"
       >
+        <UIcon
+          :name="loading ? 'i-lucide-loader-2' : 'i-lucide-sparkles'"
+          :class="['h-4 w-4', loading && 'animate-spin']"
+        />
         {{ submitLabel ?? 'Générer' }}
-      </UButton>
+      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.suggestions-row {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+.chip-enter-active,
+.chip-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
-.suggestions-row::-webkit-scrollbar {
-  display: none;
+.chip-enter-from,
+.chip-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
 }
 </style>
