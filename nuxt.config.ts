@@ -21,4 +21,9 @@ export default defineNuxtConfig({
       '@tailwindcss/postcss': {},
     },
   },
+  vite: {
+    optimizeDeps: {
+      include: ['motion-v', '@vueuse/core'],
+    },
+  },
 })
