@@ -3,7 +3,8 @@ import { Motion } from 'motion-v'
 
 useHead({ title: 'Dis-moi qui tu es, je construis ta maison' })
 
-const { state, start } = useArchitect()
+const { state, start, profileWords, quickTest } = useArchitect()
+const isDev = import.meta.dev
 </script>
 
 <template>
@@ -42,6 +43,17 @@ const { state, start } = useArchitect()
           />
           Commencer la conversation
         </button>
+
+        <button
+          v-if="isDev"
+          type="button"
+          class="mt-4 ml-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-neutral-500 ring-1 ring-neutral-300 hover:bg-neutral-100 dark:text-neutral-400 dark:ring-neutral-700 dark:hover:bg-neutral-800 transition-colors disabled:opacity-50"
+          :disabled="state.loading"
+          @click="quickTest()"
+        >
+          <UIcon name="i-lucide-zap" class="h-3.5 w-3.5" />
+          Test rapide (dev)
+        </button>
       </Motion>
 
       <UAlert
@@ -63,11 +75,12 @@ const { state, start } = useArchitect()
       v-else-if="state.phase === 'generating'"
       class="max-w-2xl mx-auto px-4 sm:px-6 h-[calc(100vh-3.5rem)] relative"
     >
-      <div class="absolute inset-4 rounded-3xl bg-neutral-100/40 dark:bg-neutral-900/40">
+      <div class="absolute inset-4 overflow-hidden rounded-3xl bg-neutral-100/40 dark:bg-neutral-900/40">
         <ProgressOverlay
           message="Construction en cours"
           hint="Notre architecte dessine ta maison…"
         />
+        <FloatingWords :words="profileWords" class="z-20" />
       </div>
     </section>
 

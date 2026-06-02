@@ -42,6 +42,34 @@ export function useArchitect() {
   const answersGiven = computed(() => state.value.messages.filter(m => m.role === 'user').length)
   const questionsTotal = REQUIRED_ANSWERS
 
+  // Meaningful words drawn from the user's own answers — used as the floating
+  // bubbles shown while the house is being generated.
+  const STOP_WORDS = new Set([
+    'le', 'la', 'les', 'un', 'une', 'des', 'de', 'du', 'et', 'ou', 'mais', 'donc',
+    'à', 'au', 'aux', 'en', 'dans', 'sur', 'sous', 'avec', 'sans', 'pour', 'par',
+    'ce', 'cet', 'cette', 'ces', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes', 'son',
+    'sa', 'ses', 'je', 'tu', 'il', 'elle', 'on', 'nous', 'vous', 'ils', 'elles',
+    'me', 'te', 'se', 'que', 'qui', 'quoi', 'dont', 'où', 'est', 'sont', 'suis',
+    'es', 'as', 'ai', 'plus', 'moins', 'très', 'trop', 'bien', 'aussi', 'pas',
+    'ne', 'oui', 'non', 'mon', 'mais', 'puis', 'alors', 'comme', 'quand', 'car',
+  ])
+
+  const profileWords = computed<string[]>(() => {
+    const seen = new Set<string>()
+    const words: string[] = []
+    for (const m of state.value.messages) {
+      if (m.role !== 'user') continue
+      for (const raw of m.content.split(/[\s,.;!?:«»"'()]+/)) {
+        const word = raw.trim()
+        const key = word.toLowerCase()
+        if (word.length < 3 || STOP_WORDS.has(key) || seen.has(key)) continue
+        seen.add(key)
+        words.push(word)
+      }
+    }
+    return words
+  })
+
   async function callApi<T>(path: string, body: unknown): Promise<T> {
     return await $fetch(path, { method: 'POST', body: body as Record<string, unknown> }) as T
   }
@@ -119,6 +147,25 @@ export function useArchitect() {
     }
   }
 
+  /**
+   * Dev-only shortcut: seed 5 canned answers locally (no per-turn API calls)
+   * and jump straight to house generation. Only one request hits the network.
+   */
+  async function quickTest() {
+    if (!import.meta.dev || state.value.loading) return
+    const answers = [
+      'Mon tout premier animal s\'appelait Plume, un chat roux un peu rêveur.',
+      'L\'automne, en fin d\'après-midi, quand la lumière devient dorée.',
+      'Une cabane isolée en pleine forêt, loin de tout, au calme.',
+      'J\'emporterais mon carnet de croquis et un crayon.',
+      'Mes proches diraient que je suis contemplatif, curieux et chaleureux.',
+    ]
+    state.value.messages = answers.map<ChatMessage>(content => ({ role: 'user', content }))
+    state.value.complete = true
+    state.value.error = null
+    await buildHouse()
+  }
+
   function reset() {
     if (state.value.loading) return
     state.value = createState()
@@ -128,9 +175,11 @@ export function useArchitect() {
     state: readonly(state),
     answersGiven,
     questionsTotal,
+    profileWords,
     start,
     sendMessage,
     buildHouse,
+    quickTest,
     reset,
   }
 }
