@@ -6,7 +6,6 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
-    "generate:bases": "tsx --env-file=.env scripts/generate-base-interiors.ts",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck"

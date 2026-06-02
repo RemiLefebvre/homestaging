@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const colorMode = useColorMode()
-const { state, reset } = useImageGenerator()
+const { state, reset } = useArchitect()
 
 const isDark = computed({
   get: () => colorMode.value === 'dark',
@@ -21,18 +21,18 @@ function toggleTheme() {
             <UIcon name="i-lucide-sparkles" class="h-4 w-4 text-white" />
           </span>
           <span class="font-display text-lg font-bold leading-none">
-            home<span class="text-gradient-brand">staging</span>
+            ta<span class="text-gradient-brand">maison</span>
           </span>
         </NuxtLink>
 
         <span class="hidden sm:inline-block h-5 w-px bg-neutral-300/60 dark:bg-neutral-700/60" />
         <p class="hidden sm:block text-sm text-neutral-500 dark:text-neutral-400">
-          Réagencez vos intérieurs avec l'IA
+          Dis-moi qui tu es, je construis ta maison
         </p>
 
         <div class="ml-auto flex items-center gap-2">
           <UButton
-            v-if="state.selectedBase"
+            v-if="state.phase !== 'intro'"
             variant="ghost"
             color="neutral"
             icon="i-lucide-rotate-ccw"

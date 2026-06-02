@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   ssr: false,
   runtimeConfig: {
     openRouterApiKey: '',
+    openRouterTextModel: 'anthropic/claude-sonnet-4',
   },
   typescript: {
     strict: true,

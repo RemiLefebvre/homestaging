@@ -27,20 +27,28 @@ const MESSAGES: Record<ApiErrorCode, ErrorMessage> = {
     hint: 'La limite est de 5 Mo par image. Réduis la taille et réessaie.',
   },
   EMPTY_PROMPT: {
-    title: 'Description vide',
-    hint: 'Décris comment tu veux agencer la pièce avant de lancer la génération.',
+    title: 'Message vide',
+    hint: 'Écris quelque chose avant d’envoyer.',
   },
   PROVIDER_ERROR: {
-    title: 'Le générateur est indisponible',
+    title: 'Service indisponible',
     hint: 'Le service IA n’a pas répondu. Réessaie dans un instant.',
   },
   INVALID_PROVIDER_RESPONSE: {
-    title: 'Réponse invalide du générateur',
-    hint: 'L’IA n’a pas renvoyé d’image exploitable. Réessaie avec une description légèrement différente.',
+    title: 'Réponse invalide',
+    hint: 'L’IA n’a pas renvoyé de résultat exploitable. Réessaie dans un instant.',
   },
   OUTPUT_TOO_LARGE: {
     title: 'Image générée trop lourde',
-    hint: 'L’image renvoyée dépasse 5 Mo. Réessaie avec une description plus simple.',
+    hint: 'L’image renvoyée dépasse 5 Mo. Réessaie.',
+  },
+  CONVERSATION_ERROR: {
+    title: 'Conversation interrompue',
+    hint: 'Impossible de poursuivre l’échange. Réessaie d’envoyer ton message.',
+  },
+  CONVERSATION_INCOMPLETE: {
+    title: 'Encore quelques réponses',
+    hint: 'Réponds aux 5 questions avant que l’on puisse construire ta maison.',
   },
 }
 

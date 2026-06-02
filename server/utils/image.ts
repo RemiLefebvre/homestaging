@@ -64,7 +64,8 @@ export function parsePublicPath(urlPath: string): { subdir: string; filename: st
   if (!match) {
     throw new ApiError('INVALID_SOURCE_PATH', `Invalid public path: "${urlPath}"`)
   }
-  const [, subdir, filename] = match as [string, string, string]
+  const subdir = match[1]!
+  const filename = match[2]!
   assertSafeSubdir(subdir)
   assertSafeFilename(filename)
   return { subdir, filename }
