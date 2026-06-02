@@ -8,6 +8,13 @@ withDefaults(defineProps<{
   message: 'Génération en cours',
   hint: '~15-20 secondes',
 })
+
+// Particules en orbite : taille, distance au centre, vitesse et opacité distinctes
+const orbits = [
+  { id: 1, size: 6, inset: 4, duration: 3.2, opacity: 0.9 },
+  { id: 2, size: 4, inset: 14, duration: 4.6, opacity: 0.6 },
+  { id: 3, size: 5, inset: 24, duration: 2.4, opacity: 0.75 },
+]
 </script>
 
 <template>
@@ -18,23 +25,37 @@ withDefaults(defineProps<{
     :exit="{ opacity: 0 }"
     :transition="{ duration: 0.3 }"
   >
-    <div class="relative h-24 w-24">
+    <div class="relative flex h-32 w-32 items-center justify-center">
+      <!-- Halo lumineux pulsant -->
       <Motion
-        v-for="i in 3"
-        :key="i"
-        class="absolute inset-0 rounded-full border-2 border-violet-400/60"
-        :initial="{ scale: 0.4, opacity: 0.8 }"
-        :animate="{ scale: 1.4, opacity: 0 }"
-        :transition="{
-          duration: 1.6,
-          repeat: Infinity,
-          delay: (i - 1) * 0.5,
-          ease: 'easeOut',
-        }"
+        class="absolute h-24 w-24 rounded-full bg-gradient-brand blur-2xl"
+        :animate="{ scale: [1, 1.35, 1], opacity: [0.35, 0.65, 0.35] }"
+        :transition="{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }"
       />
-      <div class="absolute inset-0 flex items-center justify-center">
-        <span class="h-10 w-10 rounded-full bg-gradient-brand shadow-2xl shadow-violet-500/50" />
-      </div>
+
+      <!-- Particules en orbite -->
+      <Motion
+        v-for="o in orbits"
+        :key="o.id"
+        class="absolute inset-0"
+        :animate="{ rotate: 360 }"
+        :transition="{ duration: o.duration, repeat: Infinity, ease: 'linear' }"
+      >
+        <span
+          class="absolute left-1/2 top-0 -translate-x-1/2 rounded-full bg-white shadow-lg shadow-violet-400/60"
+          :style="{ height: `${o.size}px`, width: `${o.size}px`, marginTop: `${o.inset}px`, opacity: o.opacity }"
+        />
+      </Motion>
+
+      <!-- Orbe central qui respire -->
+      <Motion
+        class="relative h-14 w-14 overflow-hidden rounded-full bg-gradient-brand shadow-2xl shadow-violet-500/60"
+        :animate="{ scale: [1, 1.12, 1] }"
+        :transition="{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }"
+      >
+        <!-- Reflet pour l'effet de sphère -->
+        <span class="absolute left-2.5 top-2 h-4 w-4 rounded-full bg-white/70 blur-[6px]" />
+      </Motion>
     </div>
 
     <div class="text-center text-white">
