@@ -5,7 +5,7 @@ import { REQUIRED_ANSWERS } from '~~/shared/types/architect'
 import { briefJsonSchema, parseBrief } from '../utils/brief'
 import { ApiError, withErrorHandling } from '../utils/errors'
 import { type OpenRouterMessage, chatCompletion, generateImageFromText } from '../utils/openrouter'
-import { ARCHITECT_SYSTEM_PROMPT } from '../utils/prompts'
+import { ARCHITECT_SYSTEM_PROMPT, buildFragmentHint } from '../utils/prompts'
 import { saveGeneratedImage } from '../utils/storage'
 
 const bodySchema = z.object({
@@ -17,6 +17,20 @@ const bodySchema = z.object({
       }),
     )
     .max(40),
+  // Ambiance fragments collected turn-by-turn during the conversation. Optional
+  // and best-effort: when present they steer the architect's palette/materials
+  // so the final house extends what the user watched being built.
+  fragments: z
+    .array(
+      z.object({
+        color: z.string(),
+        colorName: z.string(),
+        keyword: z.string(),
+        material: z.string(),
+      }),
+    )
+    .max(REQUIRED_ANSWERS)
+    .optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -25,7 +39,7 @@ export default defineEventHandler(async (event) => {
     if (!parsed.success) {
       throw new ApiError('CONVERSATION_ERROR', 'Body must include { messages }')
     }
-    const { messages } = parsed.data
+    const { messages, fragments } = parsed.data
 
     // Same server-side guard as /api/conversation: refuse before the quiz is done.
     const userAnswers = messages.filter(m => m.role === 'user').length
@@ -38,8 +52,14 @@ export default defineEventHandler(async (event) => {
     if (!apiKey) throw new ApiError('MISSING_API_KEY', 'OPEN_ROUTER_API_KEY not configured')
 
     // 1) Architect model → structured brief.
+    // Inject the ambiance fragments (if any) so the final palette and materials
+    // extend the colours/textures the user already saw being built, rather than
+    // diverging from them.
     const chat: OpenRouterMessage[] = [
       { role: 'system', content: ARCHITECT_SYSTEM_PROMPT },
+      ...(fragments && fragments.length
+        ? [{ role: 'system', content: buildFragmentHint(fragments) } as OpenRouterMessage]
+        : []),
       ...messages,
     ]
     const rawBrief = await chatCompletion({

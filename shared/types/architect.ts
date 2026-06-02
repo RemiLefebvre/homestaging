@@ -6,6 +6,22 @@ export interface ChatMessage {
 /** Number of user answers required before the house can be built. */
 export const REQUIRED_ANSWERS = 5
 
+/**
+ * A small ambiance fragment inferred from a single user answer during the
+ * conversation. The frontend accumulates one per answer to progressively build
+ * the moodboard, palette and construction progress while the quiz unfolds.
+ */
+export interface Fragment {
+  /** Hex colour evoked by the answer, normalised to #RRGGBB. */
+  color: string
+  /** Short evocative name for that colour, FR (ex: "ocre chaleureux"). */
+  colorName: string
+  /** One personality / ambiance word, FR (ex: "cosy"). */
+  keyword: string
+  /** A material or texture suggested by the answer, FR (ex: "bois clair"). */
+  material: string
+}
+
 /** Un « moment » du storytelling : une réponse de la personne ↔ un choix de design. */
 export interface StoryBeat {
   /** Le détail concret évoqué par la personne, FR (ex : "Felix, ton premier chat"). */

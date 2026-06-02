@@ -85,3 +85,38 @@ Tu réponds UNIQUEMENT par du JSON brut valide, sans aucune balise markdown (pas
 - imagePrompt: CHAÎNE — prompt détaillé EN ANGLAIS pour un modèle de génération d'image : rendu photoréaliste de l'extérieur de la maison, vue grand-angle, lumière naturelle, qualité photographie d'architecture. Décris style, matériaux, volumes, environnement et ambiance.
 
 IMPORTANT : "materials" et "story" sont des tableaux ; tous les autres champs sont des chaînes de caractères simples.`
+
+/**
+ * Build the ambiance-coherence hint handed to the architect. Summarises the
+ * fragments the user watched being built turn-by-turn (colour + name + keyword +
+ * material) and asks the architect to PROLONG them in the final palette and
+ * materials — so the generated house doesn't visually contradict the moodboard.
+ */
+export function buildFragmentHint(
+  fragments: { color: string, colorName: string, keyword: string, material: string }[],
+): string {
+  const lines = fragments
+    .map(f => `- ${f.colorName} (${f.color}) — ${f.keyword} — ${f.material}`)
+    .join('\n')
+  return `Au fil de la conversation, ces indices d'ambiance ont déjà été perçus et montrés à la personne (une couleur, un mot, une matière par réponse) :
+${lines}
+
+Prolonge-les : ta "palette" et tes "materials" doivent rester cohérents avec ces couleurs et ces matières, et ton "imagePrompt" doit les refléter. Tu peux les affiner ou les harmoniser, mais ne les contredis pas.`
+}
+
+/**
+ * Fragment persona — runs in parallel with the conversation each turn. Reads the
+ * transcript but focuses on the LAST user answer and distils it into a tiny
+ * ambiance fragment (a colour, a word, a material). Purely decorative: the
+ * frontend accumulates one per answer to build the moodboard live. Never blocks
+ * the conversation — a failure is swallowed upstream.
+ */
+export const FRAGMENT_SYSTEM_PROMPT = `Tu es un architecte qui écoute en silence. On te donne une conversation ; concentre-toi UNIQUEMENT sur la DERNIÈRE réponse de la personne et traduis-la en un fragment d'ambiance pour sa future maison.
+
+Tu réponds UNIQUEMENT par du JSON brut valide, sans aucune balise markdown (pas de \`\`\`), sans texte avant ou après. Schéma exact :
+- color: CHAÎNE — un code hexadécimal #RRGGBB d'une couleur que cette réponse évoque.
+- colorName: CHAÎNE — nom court et sensible de cette couleur (FR, 1 à 3 mots).
+- keyword: CHAÎNE — UN seul mot capturant un trait de personnalité ou d'ambiance (FR).
+- material: CHAÎNE — un matériau ou une texture d'architecture suggéré (FR, 1 à 2 mots).
+
+Tous les champs sont des chaînes simples. Reste subtil et évocateur, jamais cliché.`

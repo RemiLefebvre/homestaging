@@ -1,4 +1,4 @@
-import type { ChatMessage, HouseBrief } from '~~/shared/types/architect'
+import type { ChatMessage, Fragment, HouseBrief } from '~~/shared/types/architect'
 import { REQUIRED_ANSWERS } from '~~/shared/types/architect'
 
 interface ArchitectError {
@@ -12,6 +12,7 @@ type Phase = 'intro' | 'chat' | 'generating' | 'result'
 interface ArchitectState {
   phase: Phase
   messages: ChatMessage[]
+  fragments: Fragment[]
   complete: boolean
   loading: boolean
   error: ArchitectError | null
@@ -25,6 +26,7 @@ function createState(): ArchitectState {
   return {
     phase: 'intro',
     messages: [],
+    fragments: [],
     complete: false,
     loading: false,
     error: null,
@@ -107,12 +109,15 @@ export function useArchitect() {
     state.value.error = null
     state.value.loading = true
     try {
-      const { message, complete } = await callApi<{ message: string, complete: boolean }>(
-        '/api/conversation',
-        { messages: state.value.messages },
-      )
+      const { message, complete, fragment } = await callApi<{
+        message: string
+        complete: boolean
+        fragment: Fragment | null
+      }>('/api/conversation', { messages: state.value.messages })
       state.value.messages = [...state.value.messages, { role: 'assistant', content: message }]
       state.value.complete = complete
+      // Best-effort: accumulate the ambiance fragment for the live moodboard.
+      if (fragment) state.value.fragments = [...state.value.fragments, fragment]
     } catch (err) {
       // Roll back the optimistic user message so the input can be retried.
       state.value.messages = state.value.messages.slice(0, -1)
@@ -133,7 +138,7 @@ export function useArchitect() {
         concept: string
         profile: string
         brief: HouseBrief
-      }>('/api/house', { messages: state.value.messages })
+      }>('/api/house', { messages: state.value.messages, fragments: state.value.fragments })
       state.value.imageUrl = res.imageUrl
       state.value.concept = res.concept
       state.value.profile = res.profile

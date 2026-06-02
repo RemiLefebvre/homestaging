@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { Motion } from 'motion-v'
 
-const { state, answersGiven, questionsTotal, sendMessage, buildHouse } = useArchitect()
+const { state, questionsTotal, sendMessage, buildHouse } = useArchitect()
 
 const draft = ref('')
 const scroller = ref<HTMLElement | null>(null)
 
 const canSend = computed(() => !state.value.loading && !state.value.complete && draft.value.trim().length > 0)
-const progress = computed(() => Math.min(answersGiven.value, questionsTotal))
 
 function submit() {
   if (!canSend.value) return
@@ -35,17 +34,8 @@ watch(
 
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100vh-3.5rem)]">
-    <!-- Progression des questions -->
-    <div class="py-4 flex items-center justify-center gap-1.5">
-      <span
-        v-for="i in questionsTotal"
-        :key="i"
-        class="h-1.5 rounded-full transition-all duration-500"
-        :class="i <= progress
-          ? 'w-8 bg-gradient-brand'
-          : 'w-4 bg-neutral-200 dark:bg-neutral-800'"
-      />
-    </div>
+    <!-- Progression : la maison se construit, la palette se compose, le moodboard se peuple -->
+    <MoodboardPanel :fragments="state.fragments" :total="questionsTotal" />
 
     <!-- Fil de discussion -->
     <div
