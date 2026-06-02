@@ -6,6 +6,14 @@ export interface ChatMessage {
 /** Number of user answers required before the house can be built. */
 export const REQUIRED_ANSWERS = 5
 
+/** Un « moment » du storytelling : une réponse de la personne ↔ un choix de design. */
+export interface StoryBeat {
+  /** Le détail concret évoqué par la personne, FR (ex : "Felix, ton premier chat"). */
+  trigger: string
+  /** Le choix architectural qui en découle, FR (ex : "un patio protégé et ensoleillé"). */
+  design: string
+}
+
 /** Architectural brief produced by the architect model from the conversation. */
 export interface HouseBrief {
   /** Short inferred personality summary, FR (ex: "chaleureux, contemplatif, attaché à la nature"). */
@@ -20,6 +28,8 @@ export interface HouseBrief {
   environment: string
   /** Note d'intention reliant personnalité ↔ maison (3-4 phrases, FR). */
   concept: string
+  /** Storytelling : 3-5 moments reliant une réponse précise à un choix de design (FR). */
+  story: StoryBeat[]
   /** Detailed prompt for the image model (photorealistic architectural exterior). */
   imagePrompt: string
 }

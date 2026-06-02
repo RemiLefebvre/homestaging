@@ -4,6 +4,7 @@ import { Motion } from 'motion-v'
 const { state, reset } = useArchitect()
 
 const materials = computed(() => state.value.brief?.materials ?? [])
+const story = computed(() => state.value.brief?.story ?? [])
 </script>
 
 <template>
@@ -73,6 +74,33 @@ const materials = computed(() => state.value.brief?.materials ?? [])
           <p class="text-neutral-700 dark:text-neutral-300">{{ state.brief.palette }} — {{ state.brief.environment }}</p>
         </div>
       </div>
+    </Motion>
+
+    <!-- Pourquoi cette maison te ressemble -->
+    <Motion
+      v-if="story.length"
+      :initial="{ opacity: 0, y: 12 }"
+      :animate="{ opacity: 1, y: 0 }"
+      :transition="{ duration: 0.4, delay: 0.3 }"
+      class="surface-glass rounded-2xl p-6 mt-6"
+    >
+      <p class="text-xs uppercase tracking-widest text-violet-500 dark:text-violet-400 font-semibold mb-4">
+        Pourquoi cette maison te ressemble
+      </p>
+      <ul class="space-y-4">
+        <li
+          v-for="(beat, i) in story"
+          :key="i"
+          class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3"
+        >
+          <span class="font-display font-semibold text-violet-600 dark:text-violet-300 shrink-0 sm:w-1/3">
+            {{ beat.trigger }}
+          </span>
+          <span class="text-neutral-700 dark:text-neutral-200 leading-relaxed">
+            {{ beat.design }}
+          </span>
+        </li>
+      </ul>
     </Motion>
 
     <!-- Actions -->

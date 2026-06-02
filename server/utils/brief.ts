@@ -16,6 +16,14 @@ const flexStringArray = z
   .transform(v => (Array.isArray(v) ? v : v.split(/[,;]\s*/)))
   .pipe(z.array(z.string().trim().min(1)).min(1))
 
+// Storytelling: tolerant on purpose. A missing, empty, or off-shape `story`
+// degrades to [] instead of failing the whole brief — the house still renders.
+const storySchema = z
+  .array(z.object({ trigger: flexString, design: flexString }))
+  .min(1)
+  .max(6)
+  .catch([])
+
 export const briefSchema = z.object({
   profile: flexString,
   style: flexString,
@@ -23,6 +31,7 @@ export const briefSchema = z.object({
   palette: flexString,
   environment: flexString,
   concept: flexString,
+  story: storySchema,
   imagePrompt: flexString,
 })
 
@@ -34,7 +43,7 @@ export const briefSchema = z.object({
 export const briefJsonSchema = {
   type: 'object',
   additionalProperties: false,
-  required: ['profile', 'style', 'materials', 'palette', 'environment', 'concept', 'imagePrompt'],
+  required: ['profile', 'style', 'materials', 'palette', 'environment', 'concept', 'story', 'imagePrompt'],
   properties: {
     profile: { type: 'string' },
     style: { type: 'string' },
@@ -42,6 +51,15 @@ export const briefJsonSchema = {
     palette: { type: 'string' },
     environment: { type: 'string' },
     concept: { type: 'string' },
+    story: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['trigger', 'design'],
+        properties: { trigger: { type: 'string' }, design: { type: 'string' } },
+      },
+    },
     imagePrompt: { type: 'string' },
   },
 } as const

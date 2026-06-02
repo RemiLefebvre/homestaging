@@ -1,21 +1,26 @@
 import { REQUIRED_ANSWERS } from '~~/shared/types/architect'
 
 /**
- * The 5 anchor questions, in order. The SERVER drives which one to ask each turn
- * (see {@link buildConversationSystemPrompt}) so the model can never drift,
- * ask an extra question, or merge two — guaranteeing exactly REQUIRED_ANSWERS turns.
+ * The 5 anchor THEMES, in order. The SERVER drives which theme is explored each
+ * turn (see {@link buildConversationSystemPrompt}) so coverage and turn count
+ * stay guaranteed — exactly REQUIRED_ANSWERS turns, one theme each, no drift.
+ *
+ * Unlike a verbatim question, a theme only fixes WHAT to learn; the model phrases
+ * the actual question itself, naturally, bouncing off what the person already said.
+ * This keeps the conversation lively and different every time while the server
+ * still owns the structure.
  */
-export const QUESTIONS = [
-  'Le nom (et l\'espèce) de ton tout premier animal de compagnie.',
-  'Ta saison préférée et ton moment de la journée favori.',
-  'Un endroit où tu te sens parfaitement bien — d\'une grande ville vibrante à une cabane isolée.',
-  'Un objet que tu emporterais sur une île déserte.',
-  'Le mot que tes proches utiliseraient pour te décrire.',
+export const QUESTION_THEMES = [
+  { id: 'first-pet', topic: 'le tout premier animal de compagnie de la personne : son nom et son espèce' },
+  { id: 'season-moment', topic: 'sa saison préférée et son moment de la journée favori' },
+  { id: 'happy-place', topic: 'un endroit où elle se sent parfaitement bien — d\'une grande ville vibrante à une cabane isolée' },
+  { id: 'desert-island-object', topic: 'un objet qu\'elle emporterait sur une île déserte' },
+  { id: 'described-by-others', topic: 'le mot que ses proches utiliseraient pour la décrire' },
 ] as const
 
-// Safety net: the array must hold exactly the required number of questions.
-if (QUESTIONS.length !== REQUIRED_ANSWERS) {
-  throw new Error(`QUESTIONS must hold exactly ${REQUIRED_ANSWERS} entries, got ${QUESTIONS.length}`)
+// Safety net: the array must hold exactly the required number of themes.
+if (QUESTION_THEMES.length !== REQUIRED_ANSWERS) {
+  throw new Error(`QUESTION_THEMES must hold exactly ${REQUIRED_ANSWERS} entries, got ${QUESTION_THEMES.length}`)
 }
 
 const PERSONA = `Tu es l'hôte chaleureux et joueur d'un cabinet d'architectes. Tu cernes la personnalité de la personne à travers quelques questions légères et indirectes, pour ensuite imaginer la maison qui lui ressemble.
@@ -23,7 +28,7 @@ const PERSONA = `Tu es l'hôte chaleureux et joueur d'un cabinet d'architectes. 
 Règles absolues :
 - Tutoie la personne. Français, ton convivial, 2 à 3 phrases maximum par message.
 - Ne parle JAMAIS d'architecture, de maison ou de style pendant la conversation. Garde le mystère.
-- Ne pose QUE la question qu'on te demande de poser, telle quelle (tu peux la reformuler légèrement pour le naturel, sans en changer le sens). N'ajoute aucune autre question.`
+- Pose UNE seule question par message, et uniquement sur le thème qu'on te confie pour ce tour. N'aborde aucun autre sujet et n'ajoute aucune question supplémentaire.`
 
 /**
  * Build the conversation system prompt for the current turn.
@@ -34,23 +39,25 @@ Règles absolues :
  * - N (>= total) → conversation done: warmly thank, ask nothing more
  */
 export function buildConversationSystemPrompt(answeredCount: number): string {
-  if (answeredCount >= QUESTIONS.length) {
+  if (answeredCount >= QUESTION_THEMES.length) {
     return `${PERSONA}
 
 L'entretien est terminé : tu as toutes les réponses dont tu as besoin. Réagis brièvement et chaleureusement à la dernière réponse de la personne, puis remercie-la en lui disant que tu en sais assez pour imaginer sa maison. NE pose AUCUNE nouvelle question.`
   }
 
-  const nextQuestion = QUESTIONS[answeredCount]
+  // Safe: the guard above guarantees answeredCount is a valid index here.
+  const theme = QUESTION_THEMES[answeredCount]!
 
   if (answeredCount === 0) {
     return `${PERSONA}
 
-C'est le tout début. Accueille la personne en une phrase, puis pose-lui exactement cette question : « ${nextQuestion} »`
+C'est le tout début. Accueille la personne en une phrase, puis pose-lui UNE question, que tu formules toi-même de façon naturelle et joueuse, sur ce thème : ${theme.topic}.`
   }
 
   return `${PERSONA}
 
-Réagis d'abord brièvement et chaleureusement à la dernière réponse de la personne (une phrase, avec curiosité ou humour), puis pose-lui exactement cette question : « ${nextQuestion} »`
+Rebondis d'abord brièvement sur la dernière réponse de la personne (une phrase : curiosité, humour, ou un clin d'œil à un détail qu'elle vient de donner). Pose-lui ENSUITE UNE seule question, que tu formules toi-même, sur ce nouveau thème : ${theme.topic}.
+Quand c'est pertinent, tisse un lien léger avec ce qu'elle a déjà raconté pour que la question semble personnelle — sans jamais reposer une question déjà posée.`
 }
 
 /**
@@ -74,6 +81,7 @@ Tu réponds UNIQUEMENT par du JSON brut valide, sans aucune balise markdown (pas
 - palette: CHAÎNE — palette de couleurs décrite en une phrase (FR).
 - environment: CHAÎNE — cadre / environnement + lumière (FR).
 - concept: CHAÎNE — note d'intention de 3-4 phrases reliant explicitement la personnalité à la maison (FR).
+- story: TABLEAU d'objets { trigger, design } — 3 à 5 moments. Chaque moment relie UNE réponse PRÉCISE de la personne à UN choix de design concret. "trigger" = le détail réel qu'elle a donné, cité concrètement (nom de l'animal, saison, lieu, objet, mot), court (FR). "design" = le choix architectural qui en découle, court et concret (FR). Ne reformule pas le concept global : ancre chaque moment dans une réponse identifiable.
 - imagePrompt: CHAÎNE — prompt détaillé EN ANGLAIS pour un modèle de génération d'image : rendu photoréaliste de l'extérieur de la maison, vue grand-angle, lumière naturelle, qualité photographie d'architecture. Décris style, matériaux, volumes, environnement et ambiance.
 
-IMPORTANT : seul "materials" est un tableau ; tous les autres champs sont des chaînes de caractères simples.`
+IMPORTANT : "materials" et "story" sont des tableaux ; tous les autres champs sont des chaînes de caractères simples.`

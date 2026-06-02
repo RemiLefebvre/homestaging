@@ -56,8 +56,22 @@ export async function chatCompletion(params: {
     throw new ApiError('PROVIDER_ERROR', `OpenRouter chat call failed: ${msg}`)
   }
 
-  const text = response.choices?.[0]?.message?.content
-  if (typeof text !== 'string' || !text.trim()) {
+  const message = response.choices?.[0]?.message
+  let text = typeof message?.content === 'string' ? message.content : ''
+
+  // When response_format=json_schema is requested, some providers (notably
+  // Anthropic via OpenRouter) return the structured JSON through a forced tool
+  // call instead of message.content, leaving content empty. Fall back to the
+  // tool call arguments so the caller still gets the JSON payload to parse.
+  if (!text.trim()) {
+    const toolArgs = message?.tool_calls?.[0]?.function?.arguments
+    if (typeof toolArgs === 'string' && toolArgs.trim()) {
+      text = toolArgs
+    }
+  }
+
+  if (!text.trim()) {
+    console.error('OpenRouter empty content; message shape:', JSON.stringify(message))
     throw new ApiError('INVALID_PROVIDER_RESPONSE', 'OpenRouter returned no text content')
   }
   return text
