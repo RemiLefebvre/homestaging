@@ -1,52 +1,52 @@
-# Homestaging — *Tell me who you are, I'll build your house*
+# Homestaging — *Dis-moi qui tu es, je construis ta maison*
 
-A web POC that turns a short conversation into a bespoke house: 5 questions, a personality reading, and an image of the exterior of the house that resembles the person.
+Un POC web qui transforme une courte conversation en une maison sur-mesure : 5 questions, une analyse de personnalité, puis une image de l'extérieur de la maison qui ressemble à la personne.
 
-## How it works
+## Comment ça marche
 
-1. The user answers 5 open questions (`POST /api/conversation`).
-2. An *architect prompt* infers a personality profile and an architectural brief (`POST /api/house/brief`).
-3. The brief is used as a prompt for an image model (`POST /api/house/image`).
-4. During the conversation, a *moodboard* is built in real time (colours, materials, atmosphere) from each answer.
+1. L'utilisateur répond à 5 questions ouvertes (`POST /api/conversation`).
+2. Un *architect prompt* infère un profil de personnalité et un brief architectural (`POST /api/house/brief`).
+3. Le brief sert de prompt à un modèle d'image (`POST /api/house/image`).
+4. Pendant la conversation, un *moodboard* se construit en direct (couleurs, matériaux, ambiance) à partir de chaque réponse.
 
 ## Stack
 
-- [Nuxt 4](https://nuxt.com/) (SSR off, SPA mode)
+- [Nuxt 4](https://nuxt.com/) (SSR off, mode SPA)
 - [Nuxt UI 3](https://ui.nuxt.com/) + Tailwind CSS 4
-- [motion-v](https://motion.dev/) for animations
-- [OpenRouter](https://openrouter.ai/) for LLM calls and image generation (text model: `anthropic/claude-sonnet-4` by default)
-- TypeScript strict, [Zod](https://zod.dev/) for validation
+- [motion-v](https://motion.dev/) pour les animations
+- [OpenRouter](https://openrouter.ai/) pour les appels LLM et la génération d'images (texte : `anthropic/claude-sonnet-4` par défaut)
+- TypeScript strict, [Zod](https://zod.dev/) pour la validation
 
-## Run locally
+## Lancer en local
 
-Requirements: Node 20+ and [pnpm](https://pnpm.io/).
+Prérequis : Node 20+ et [pnpm](https://pnpm.io/).
 
 ```bash
 pnpm install
-cp .env.example .env   # then fill in your OpenRouter key
+cp .env.example .env   # puis renseigne ta clé OpenRouter
 pnpm dev
 ```
 
-The app runs on http://localhost:3000.
+L'app tourne sur http://localhost:3000.
 
-## Environment variables
+## Variables d'environnement
 
-| Variable | Required | Description |
+| Variable | Obligatoire | Description |
 |---|---|---|
-| `NUXT_OPEN_ROUTER_API_KEY` | yes | [OpenRouter](https://openrouter.ai/keys) API key |
-| `NUXT_OPEN_ROUTER_TEXT_MODEL` | no | Text model (default: `anthropic/claude-sonnet-4`) |
+| `NUXT_OPEN_ROUTER_API_KEY` | oui | Clé API [OpenRouter](https://openrouter.ai/keys) |
+| `NUXT_OPEN_ROUTER_TEXT_MODEL` | non | Modèle texte (défaut : `anthropic/claude-sonnet-4`) |
 
-Generated images are stored in `public/generated/` (git-ignored).
+Les images générées sont stockées dans `public/generated/` (ignoré par git).
 
 ## Structure
 
 ```
-app/         # Vue pages, components, composables
-server/      # Nitro endpoints + utils (openrouter, brief, image, storage)
-shared/      # types shared between app and server
-public/      # static assets + folder for generated images
+app/         # pages, composants, composables Vue
+server/      # endpoints Nitro + utils (openrouter, brief, image, storage)
+shared/      # types partagés app ↔ server
+public/      # assets statiques + dossier des images générées
 ```
 
-## License
+## Licence
 
 [MIT](./LICENSE)

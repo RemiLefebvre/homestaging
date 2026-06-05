@@ -47,14 +47,13 @@ export function useArchitect() {
   // Meaningful words drawn from the user's own answers — used as the floating
   // bubbles shown while the house is being generated.
   const STOP_WORDS = new Set([
-    'the', 'a', 'an', 'and', 'or', 'but', 'so', 'because', 'as', 'if', 'than',
-    'to', 'of', 'in', 'on', 'at', 'by', 'for', 'with', 'without', 'from', 'into',
-    'this', 'that', 'these', 'those', 'my', 'your', 'his', 'her', 'their', 'our',
-    'i', 'you', 'he', 'she', 'we', 'they', 'it', 'me', 'him', 'them', 'us',
-    'is', 'are', 'was', 'were', 'be', 'been', 'being', 'am',
-    'do', 'does', 'did', 'have', 'has', 'had', 'will', 'would', 'can', 'could',
-    'not', 'no', 'yes', 'too', 'very', 'just', 'also', 'then', 'when', 'where',
-    'who', 'what', 'which', 'why', 'how', 'all', 'some', 'any', 'more', 'less',
+    'le', 'la', 'les', 'un', 'une', 'des', 'de', 'du', 'et', 'ou', 'mais', 'donc',
+    'à', 'au', 'aux', 'en', 'dans', 'sur', 'sous', 'avec', 'sans', 'pour', 'par',
+    'ce', 'cet', 'cette', 'ces', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes', 'son',
+    'sa', 'ses', 'je', 'tu', 'il', 'elle', 'on', 'nous', 'vous', 'ils', 'elles',
+    'me', 'te', 'se', 'que', 'qui', 'quoi', 'dont', 'où', 'est', 'sont', 'suis',
+    'es', 'as', 'ai', 'plus', 'moins', 'très', 'trop', 'bien', 'aussi', 'pas',
+    'ne', 'oui', 'non', 'mon', 'mais', 'puis', 'alors', 'comme', 'quand', 'car',
   ])
 
   const profileWords = computed<string[]>(() => {
@@ -177,11 +176,11 @@ export function useArchitect() {
   async function quickTest() {
     if (!import.meta.dev || state.value.loading) return
     const answers = [
-      'My very first pet was named Plume, a slightly dreamy ginger cat.',
-      'Autumn, late in the afternoon, when the light turns golden.',
-      'A remote cabin deep in the forest, far from everything, completely quiet.',
-      'I would take my sketchbook and a pencil.',
-      'My close ones would say I am contemplative, curious, and warm.',
+      'Mon tout premier animal s\'appelait Plume, un chat roux un peu rêveur.',
+      'L\'automne, en fin d\'après-midi, quand la lumière devient dorée.',
+      'Une cabane isolée en pleine forêt, loin de tout, au calme.',
+      'J\'emporterais mon carnet de croquis et un crayon.',
+      'Mes proches diraient que je suis contemplatif, curieux et chaleureux.',
     ]
     state.value.messages = answers.map<ChatMessage>(content => ({ role: 'user', content }))
     state.value.complete = true
