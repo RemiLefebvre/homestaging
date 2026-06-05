@@ -6,8 +6,16 @@ useHead({ title: 'Dis-moi qui tu es, je construis ta maison' })
 const { state, start, profileWords, quickTest } = useArchitect()
 const isDev = import.meta.dev
 
-const { data: gallery } = await useFetch<{ images: string[] }>('/api/gallery')
+const { data: gallery, refresh: refreshGallery } = await useFetch<{ images: string[] }>('/api/gallery')
 const galleryImages = computed(() => gallery.value?.images ?? [])
+
+// Refresh the gallery when returning to the intro (e.g. after "Recommencer"),
+// so the freshly generated house shows up without needing a page reload.
+watch(() => state.value.phase, (phase, previous) => {
+  if (phase === 'intro' && previous && previous !== 'intro') {
+    refreshGallery()
+  }
+})
 </script>
 
 <template>
