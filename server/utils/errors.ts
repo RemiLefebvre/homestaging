@@ -12,6 +12,7 @@ export type ApiErrorCode =
   | 'OUTPUT_TOO_LARGE'
   | 'CONVERSATION_ERROR'
   | 'CONVERSATION_INCOMPLETE'
+  | 'UNAUTHORIZED'
 
 const DEFAULT_HTTP_STATUS: Record<ApiErrorCode, number> = {
   MISSING_API_KEY: 500,
@@ -25,6 +26,7 @@ const DEFAULT_HTTP_STATUS: Record<ApiErrorCode, number> = {
   OUTPUT_TOO_LARGE: 502,
   CONVERSATION_ERROR: 400,
   CONVERSATION_INCOMPLETE: 400,
+  UNAUTHORIZED: 401,
 }
 
 export class ApiError extends Error {

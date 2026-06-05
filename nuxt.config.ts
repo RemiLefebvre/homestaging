@@ -7,6 +7,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     openRouterApiKey: '',
     openRouterTextModel: 'anthropic/claude-sonnet-4',
+    // Site-wide password gate. Empty = public mode (no gate). Set via NUXT_SITE_PASSWORD.
+    sitePassword: '',
   },
   typescript: {
     strict: true,
