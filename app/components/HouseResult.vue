@@ -9,7 +9,7 @@ const story = computed(() => state.value.brief?.story ?? [])
 
 <template>
   <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-    <!-- Titre discret : le parti architectural -->
+    <!-- Quiet title: the architectural stance -->
     <Motion
       v-if="state.brief"
       :initial="{ opacity: 0, y: 12 }"
@@ -22,7 +22,7 @@ const story = computed(() => state.value.brief?.story ?? [])
       </h1>
     </Motion>
 
-    <!-- Image de la maison -->
+    <!-- House image -->
     <Motion
       :initial="{ opacity: 0, scale: 0.98 }"
       :animate="{ opacity: 1, scale: 1 }"
@@ -37,7 +37,7 @@ const story = computed(() => state.value.brief?.story ?? [])
       >
     </Motion>
 
-    <!-- Note d'intention -->
+    <!-- Intent note -->
     <Motion
       :initial="{ opacity: 0, y: 12 }"
       :animate="{ opacity: 1, y: 0 }"
@@ -71,7 +71,7 @@ const story = computed(() => state.value.brief?.story ?? [])
       </div>
     </Motion>
 
-    <!-- Pourquoi cette maison te ressemble -->
+    <!-- Why this house looks like you -->
     <Motion
       v-if="story.length"
       :initial="{ opacity: 0, y: 12 }"

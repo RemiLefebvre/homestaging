@@ -34,9 +34,10 @@ L'app tourne sur http://localhost:3000.
 | Variable | Obligatoire | Description |
 |---|---|---|
 | `NUXT_OPEN_ROUTER_API_KEY` | oui | Clé API [OpenRouter](https://openrouter.ai/keys) |
+| `BLOB_READ_WRITE_TOKEN` | oui | Token d'écriture pour [Vercel Blob](https://vercel.com/docs/storage/vercel-blob). Récupéré automatiquement en prod si un store Blob est lié au projet ; en local : `vercel env pull` ou copie depuis le dashboard |
 | `NUXT_OPEN_ROUTER_TEXT_MODEL` | non | Modèle texte (défaut : `anthropic/claude-sonnet-4`) |
 
-Les images générées sont stockées dans `public/generated/` (ignoré par git).
+Les maisons générées sont stockées sur Vercel Blob (préfixe `generated/`) — pas dans le repo.
 
 ## Structure
 

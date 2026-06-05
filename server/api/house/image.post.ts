@@ -1,4 +1,3 @@
-import { resolve } from 'node:path'
 import { defineEventHandler, readValidatedBody } from 'h3'
 import { z } from 'zod'
 import { ApiError, withErrorHandling } from '../../utils/errors'
@@ -27,8 +26,7 @@ export default defineEventHandler(async (event) => {
     if (!apiKey) throw new ApiError('MISSING_API_KEY', 'OPEN_ROUTER_API_KEY not configured')
 
     const generated = await generateImageFromText({ apiKey, prompt: imagePrompt })
-    const publicRoot = resolve(process.cwd(), 'public')
-    const { url } = await saveGeneratedImage(generated.buffer, publicRoot)
+    const { url } = await saveGeneratedImage(generated.buffer)
 
     return { imageUrl: url }
   })

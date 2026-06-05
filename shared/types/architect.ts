@@ -22,31 +22,31 @@ export interface Fragment {
   material: string
 }
 
-/** Un « moment » du storytelling : une réponse de la personne ↔ un choix de design. */
+/** One storytelling "moment": a person's answer ↔ a design choice. */
 export interface StoryBeat {
-  /** Le détail concret évoqué par la personne, FR (ex : "Felix, ton premier chat"). */
+  /** Concrete detail mentioned by the person, FR output (e.g. "Felix, ton premier chat"). */
   trigger: string
-  /** Le choix architectural qui en découle, FR (ex : "un patio protégé et ensoleillé"). */
+  /** Architectural choice that follows, FR output (e.g. "un patio protégé et ensoleillé"). */
   design: string
-  /** Mini-interprétation Barnum-style reliant le détail à un trait universel (FR). Peut être vide. */
+  /** Barnum-style mini-interpretation tying the detail to a universal trait, FR output. May be empty. */
   meaning: string
 }
 
 /** Architectural brief produced by the architect model from the conversation. */
 export interface HouseBrief {
-  /** Short inferred personality summary, FR (ex: "chaleureux, contemplatif, attaché à la nature"). */
+  /** Short inferred personality summary, FR output (e.g. "chaleureux, contemplatif, attaché à la nature"). */
   profile: string
-  /** Architectural style label, FR. */
+  /** Architectural style label, FR output. */
   style: string
   /** Main exterior materials. */
   materials: string[]
-  /** Colour palette, FR. */
+  /** Colour palette, FR output. */
   palette: string
-  /** Setting / surroundings + light, FR. */
+  /** Setting / surroundings + light, FR output. */
   environment: string
-  /** Note d'intention reliant personnalité ↔ maison (3-4 phrases, FR). */
+  /** Intent note tying personality ↔ house (3-4 sentences, FR output). */
   concept: string
-  /** Storytelling : 3-5 moments reliant une réponse précise à un choix de design (FR). */
+  /** Storytelling: 3-5 moments tying a specific answer to a design choice, FR output. */
   story: StoryBeat[]
   /** Detailed prompt for the image model (photorealistic architectural exterior). */
   imagePrompt: string

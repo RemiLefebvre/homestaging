@@ -45,10 +45,10 @@ watch(
 
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100vh-3.5rem)]">
-    <!-- Progression : la maison se construit, la palette se compose, le moodboard se peuple -->
+    <!-- Progress: the house comes together as the palette + moodboard fill up answer by answer. -->
     <MoodboardPanel :fragments="state.fragments" :total="questionsTotal" />
 
-    <!-- Fil de discussion -->
+    <!-- Conversation thread -->
     <div
       ref="scroller"
       class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-4 py-2"
@@ -77,7 +77,7 @@ watch(
         </div>
       </Motion>
 
-      <!-- Indicateur de saisie -->
+      <!-- Typing indicator -->
       <div v-if="state.loading" class="self-start flex gap-2.5 items-end">
         <span class="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-brand shadow-md shadow-violet-500/30">
           <UIcon name="i-lucide-sparkles" class="h-4 w-4 text-white" />
@@ -98,7 +98,7 @@ watch(
       icon="i-lucide-alert-triangle"
     />
 
-    <!-- Zone de saisie / bouton final -->
+    <!-- Input zone / final action -->
     <div class="py-4">
       <div class="surface-glass-strong rounded-2xl p-3 shadow-2xl shadow-violet-500/5 ring-1 ring-black/5 dark:ring-white/10">
         <template v-if="state.complete">

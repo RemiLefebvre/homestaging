@@ -19,7 +19,7 @@ const done = computed(() => built.value >= props.total)
 
 <template>
   <div class="py-3 space-y-3">
-    <!-- Construction + palette : chaque réponse pose une pierre colorée -->
+    <!-- Construction + palette: each answer drops a coloured stone -->
     <div class="flex items-center gap-2.5">
       <div class="flex-1 flex items-center gap-1.5">
         <div
@@ -42,7 +42,7 @@ const done = computed(() => built.value >= props.total)
         </div>
       </div>
 
-      <!-- La maison « s'allume » une fois la palette complète -->
+      <!-- The house "lights up" once the palette is complete -->
       <Motion
         class="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-xl transition-colors duration-700"
         :class="done
@@ -59,7 +59,7 @@ const done = computed(() => built.value >= props.total)
       </Motion>
     </div>
 
-    <!-- Moodboard : une carte par réponse (#6) -->
+    <!-- Moodboard: one card per answer -->
     <div
       v-if="built > 0"
       class="grid grid-cols-5 gap-2"

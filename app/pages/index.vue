@@ -81,7 +81,7 @@ const galleryImages = computed(() => gallery.value?.images ?? [])
     <!-- Conversation -->
     <ConversationChat v-else-if="state.phase === 'chat'" />
 
-    <!-- Génération -->
+    <!-- Generation -->
     <section
       v-else-if="state.phase === 'generating'"
       class="max-w-2xl mx-auto px-4 sm:px-6 h-[calc(100vh-3.5rem)] relative"
@@ -96,7 +96,7 @@ const galleryImages = computed(() => gallery.value?.images ?? [])
       </div>
     </section>
 
-    <!-- Résultat -->
+    <!-- Result -->
     <HouseResult v-else-if="state.phase === 'result'" />
   </main>
 </template>
