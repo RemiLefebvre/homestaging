@@ -90,6 +90,7 @@ const galleryImages = computed(() => gallery.value?.images ?? [])
         <ProgressOverlay
           message="Construction en cours"
           hint="Notre architecte dessine ta maison…"
+          :profile="state.profile"
         />
         <FloatingWords :words="profileWords" class="z-20" />
       </div>

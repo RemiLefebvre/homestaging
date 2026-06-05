@@ -4,9 +4,11 @@ import { Motion } from 'motion-v'
 withDefaults(defineProps<{
   message?: string
   hint?: string
+  profile?: string | null
 }>(), {
   message: 'Génération en cours',
   hint: '~15-20 secondes',
+  profile: null,
 })
 
 // Particules en orbite : taille, distance au centre, vitesse et opacité distinctes
@@ -57,6 +59,23 @@ const orbits = [
         <span class="absolute left-2.5 top-2 h-4 w-4 rounded-full bg-white/70 blur-[6px]" />
       </Motion>
     </div>
+
+    <!-- Profil inféré : surgit dès que l'architecte a parlé, AVANT que l'image n'arrive. -->
+    <Motion
+      v-if="profile"
+      key="profile"
+      class="px-6 max-w-md text-center"
+      :initial="{ opacity: 0, y: 10 }"
+      :animate="{ opacity: 1, y: 0 }"
+      :transition="{ duration: 0.6, ease: 'easeOut' }"
+    >
+      <p class="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-violet-300 font-semibold mb-2">
+        Profil inféré
+      </p>
+      <p class="font-display text-base sm:text-lg leading-snug text-white">
+        {{ profile }}
+      </p>
+    </Motion>
 
     <div class="text-center text-white">
       <p class="font-display text-lg font-semibold">{{ message }}</p>

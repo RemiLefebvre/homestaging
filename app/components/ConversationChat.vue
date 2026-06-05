@@ -5,8 +5,17 @@ const { state, questionsTotal, sendMessage, buildHouse } = useArchitect()
 
 const draft = ref('')
 const scroller = ref<HTMLElement | null>(null)
+const inputRef = ref<{ textareaRef?: HTMLTextAreaElement, $el?: HTMLElement } | null>(null)
 
 const canSend = computed(() => !state.value.loading && !state.value.complete && draft.value.trim().length > 0)
+
+// UTextarea exposes its underlying <textarea> via `textareaRef`; fall back to a DOM query
+// in case Nuxt UI changes that contract.
+function focusInput() {
+  const el = inputRef.value
+  const textarea = el?.textareaRef ?? el?.$el?.querySelector?.('textarea') ?? null
+  textarea?.focus()
+}
 
 function submit() {
   if (!canSend.value) return
@@ -22,18 +31,20 @@ function onKeydown(event: KeyboardEvent) {
   }
 }
 
-// Keep the latest message in view.
+// Keep the latest message in view, and bring focus back to the input when the
+// model finishes replying — the `:disabled` on UTextarea drops focus otherwise.
 watch(
-  () => [state.value.messages.length, state.value.loading],
-  async () => {
+  () => [state.value.messages.length, state.value.loading] as const,
+  async ([, loading]) => {
     await nextTick()
     scroller.value?.scrollTo({ top: scroller.value.scrollHeight, behavior: 'smooth' })
+    if (!loading && !state.value.complete) focusInput()
   },
 )
 </script>
 
 <template>
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100vh-3.5rem)]">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100vh-3.5rem)]">
     <!-- Progression : la maison se construit, la palette se compose, le moodboard se peuple -->
     <MoodboardPanel :fragments="state.fragments" :total="questionsTotal" />
 
@@ -103,6 +114,7 @@ watch(
         </template>
         <div v-else class="flex items-end gap-2">
           <UTextarea
+            ref="inputRef"
             v-model="draft"
             class="flex-1"
             :rows="1"

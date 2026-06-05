@@ -9,22 +9,17 @@ const story = computed(() => state.value.brief?.story ?? [])
 
 <template>
   <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-    <!-- Profil inféré -->
+    <!-- Titre discret : le parti architectural -->
     <Motion
+      v-if="state.brief"
       :initial="{ opacity: 0, y: 12 }"
       :animate="{ opacity: 1, y: 0 }"
       :transition="{ duration: 0.4 }"
-      class="text-center mb-8"
+      class="text-center mb-6"
     >
-      <p class="text-xs uppercase tracking-widest text-violet-500 dark:text-violet-400 font-semibold mb-2">
-        Profil inféré
-      </p>
-      <h1 class="font-display text-2xl sm:text-3xl font-bold">
-        {{ state.profile }}
-      </h1>
-      <p v-if="state.brief" class="mt-2 text-neutral-500 dark:text-neutral-400">
+      <h1 class="font-display text-xl sm:text-2xl font-medium tracking-tight text-neutral-700 dark:text-neutral-200">
         {{ state.brief.style }}
-      </p>
+      </h1>
     </Motion>
 
     <!-- Image de la maison -->
@@ -87,7 +82,7 @@ const story = computed(() => state.value.brief?.story ?? [])
       <p class="text-xs uppercase tracking-widest text-violet-500 dark:text-violet-400 font-semibold mb-4">
         Pourquoi cette maison te ressemble
       </p>
-      <ul class="space-y-4">
+      <ul class="space-y-5">
         <li
           v-for="(beat, i) in story"
           :key="i"
@@ -97,7 +92,10 @@ const story = computed(() => state.value.brief?.story ?? [])
             {{ beat.trigger }}
           </span>
           <span class="text-neutral-700 dark:text-neutral-200 leading-relaxed">
-            {{ beat.design }}
+            <span v-if="beat.meaning" class="italic text-neutral-500 dark:text-neutral-400">
+              {{ beat.meaning }}.
+            </span>
+            <span v-if="beat.meaning"> </span>{{ beat.design }}
           </span>
         </li>
       </ul>

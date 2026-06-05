@@ -127,22 +127,39 @@ export function useArchitect() {
     }
   }
 
+  /** Minimum time the inferred profile stays visible in the loading overlay (ms). */
+  const PROFILE_MIN_DISPLAY_MS = 10_000
+
   async function buildHouse() {
     if (state.value.loading || !state.value.complete) return
     state.value.phase = 'generating'
     state.value.error = null
     state.value.loading = true
     try {
-      const res = await callApi<{
-        imageUrl: string
-        concept: string
-        profile: string
-        brief: HouseBrief
-      }>('/api/house', { messages: state.value.messages, fragments: state.value.fragments })
-      state.value.imageUrl = res.imageUrl
-      state.value.concept = res.concept
-      state.value.profile = res.profile
-      state.value.brief = res.brief
+      // 1) Fast text call → light up the profile in the overlay ASAP.
+      const briefRes = await callApi<{ brief: HouseBrief, profile: string, concept: string }>(
+        '/api/house/brief',
+        { messages: state.value.messages, fragments: state.value.fragments },
+      )
+      state.value.brief = briefRes.brief
+      state.value.profile = briefRes.profile
+      state.value.concept = briefRes.concept
+      const profileShownAt = Date.now()
+
+      // 2) Slow image call — runs while the user is reading the profile.
+      const imgRes = await callApi<{ imageUrl: string }>(
+        '/api/house/image',
+        { imagePrompt: briefRes.brief.imagePrompt },
+      )
+      state.value.imageUrl = imgRes.imageUrl
+
+      // 3) Guarantee the profile stayed up long enough to be read before swapping
+      //    to the result. Image is usually slower than this, so it's a safety floor.
+      const elapsed = Date.now() - profileShownAt
+      if (elapsed < PROFILE_MIN_DISPLAY_MS) {
+        await new Promise(resolve => setTimeout(resolve, PROFILE_MIN_DISPLAY_MS - elapsed))
+      }
+
       state.value.phase = 'result'
     } catch (err) {
       handleError(err)

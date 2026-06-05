@@ -57,7 +57,8 @@ C'est le tout début. Accueille la personne en une phrase, puis pose-lui UNE que
   return `${PERSONA}
 
 Rebondis d'abord brièvement sur la dernière réponse de la personne (une phrase : curiosité, humour, ou un clin d'œil à un détail qu'elle vient de donner). Pose-lui ENSUITE UNE seule question, que tu formules toi-même, sur ce nouveau thème : ${theme.topic}.
-Quand c'est pertinent, tisse un lien léger avec ce qu'elle a déjà raconté pour que la question semble personnelle — sans jamais reposer une question déjà posée.`
+Quand c'est pertinent, tisse un lien léger avec ce qu'elle a déjà raconté pour que la question semble personnelle — sans jamais reposer une question déjà posée.
+De temps en temps seulement (UNE seule fois sur l'ensemble de la conversation, jamais plus), tu peux glisser dans ton rebond une mini-observation en miroir, jamais affirmative, toujours en demi-teinte (ex : « on dirait quelqu'un qui aime que les choses aient un sens caché, non ? »). Si tu l'as déjà fait dans un message précédent, n'en refais pas — sinon ça sonne faux.`
 }
 
 /**
@@ -75,13 +76,13 @@ Principes de traduction personnalité → architecture :
 Adapte ces principes finement aux signaux réels de la conversation ; ne plaque pas de clichés.
 
 Tu réponds UNIQUEMENT par du JSON brut valide, sans aucune balise markdown (pas de \`\`\`), sans texte avant ou après. Schéma exact :
-- profile: CHAÎNE — résumé de personnalité inféré, 3 à 5 adjectifs (FR).
+- profile: CHAÎNE — lecture de personnalité en 2 phrases (FR). Exprime des dualités assumées, des nuances que la personne pourrait reconnaître chez elle. Évite les adjectifs plats ; cherche des observations qui sonnent intimes mais restent ouvertes.
 - style: CHAÎNE — libellé du parti architectural (FR).
 - materials: TABLEAU de chaînes — les matériaux extérieurs principaux.
 - palette: CHAÎNE — palette de couleurs décrite en une phrase (FR).
 - environment: CHAÎNE — cadre / environnement + lumière (FR).
 - concept: CHAÎNE — note d'intention de 3-4 phrases reliant explicitement la personnalité à la maison (FR).
-- story: TABLEAU d'objets { trigger, design } — 3 à 5 moments. Chaque moment relie UNE réponse PRÉCISE de la personne à UN choix de design concret. "trigger" = le détail réel qu'elle a donné, cité concrètement (nom de l'animal, saison, lieu, objet, mot), court (FR). "design" = le choix architectural qui en découle, court et concret (FR). Ne reformule pas le concept global : ancre chaque moment dans une réponse identifiable.
+- story: TABLEAU d'objets { trigger, design, meaning } — 3 à 5 moments. Chaque moment relie UNE réponse PRÉCISE de la personne à UN choix de design concret. "trigger" = le détail réel qu'elle a donné, cité concrètement (nom de l'animal, saison, lieu, objet, mot), court (FR). "design" = le choix architectural qui en découle, court et concret (FR). "meaning" = une mini-interprétation qui sonne personnelle (ex : « tu cherches des refuges plutôt que des vitrines », « tu n'aimes pas qu'on te dise ce que tu dois aimer »), assez ouverte pour que la plupart des gens s'y reconnaissent, courte (FR). Ne reformule pas le concept global : ancre chaque moment dans une réponse identifiable.
 - imagePrompt: CHAÎNE — prompt détaillé EN ANGLAIS pour un modèle de génération d'image : rendu photoréaliste de l'extérieur de la maison, vue grand-angle, lumière naturelle, qualité photographie d'architecture. Décris style, matériaux, volumes, environnement et ambiance.
 
 IMPORTANT : "materials" et "story" sont des tableaux ; tous les autres champs sont des chaînes de caractères simples.`

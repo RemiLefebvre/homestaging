@@ -62,12 +62,12 @@ const done = computed(() => built.value >= props.total)
     <!-- Moodboard : une carte par réponse (#6) -->
     <div
       v-if="built > 0"
-      class="flex gap-2 overflow-x-auto scrollbar-thin -mx-1 px-1 pb-1"
+      class="grid grid-cols-5 gap-2"
     >
       <Motion
         v-for="(frag, i) in fragments"
         :key="i"
-        class="shrink-0 w-32 surface-glass rounded-xl p-2.5 flex flex-col gap-1.5"
+        class="surface-glass rounded-xl p-2.5 flex flex-col gap-1.5 min-w-0"
         :initial="{ opacity: 0, y: 10, scale: 0.95 }"
         :animate="{ opacity: 1, y: 0, scale: 1 }"
         :transition="{ type: 'spring', stiffness: 260, damping: 20 }"
@@ -77,16 +77,16 @@ const done = computed(() => built.value >= props.total)
             class="h-4 w-4 shrink-0 rounded-full ring-1 ring-black/10 dark:ring-white/10"
             :style="{ backgroundColor: frag.color }"
           />
-          <span class="text-[11px] font-medium text-neutral-600 dark:text-neutral-300 truncate">
+          <span class="text-[11px] font-medium text-neutral-600 dark:text-neutral-300">
             {{ frag.colorName }}
           </span>
         </div>
-        <span class="text-sm font-semibold capitalize text-neutral-800 dark:text-neutral-100 truncate">
+        <span class="text-sm font-semibold capitalize text-neutral-800 dark:text-neutral-100 break-words">
           {{ frag.keyword }}
         </span>
-        <span class="inline-flex items-center gap-1 text-[11px] text-neutral-500 dark:text-neutral-400 truncate">
-          <UIcon name="i-lucide-layers" class="h-3 w-3 shrink-0" />
-          {{ frag.material }}
+        <span class="inline-flex items-start gap-1 text-[11px] text-neutral-500 dark:text-neutral-400">
+          <UIcon name="i-lucide-layers" class="h-3 w-3 shrink-0 mt-0.5" />
+          <span class="break-words">{{ frag.material }}</span>
         </span>
       </Motion>
     </div>

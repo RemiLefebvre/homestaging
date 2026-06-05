@@ -28,6 +28,8 @@ export interface StoryBeat {
   trigger: string
   /** Le choix architectural qui en découle, FR (ex : "un patio protégé et ensoleillé"). */
   design: string
+  /** Mini-interprétation Barnum-style reliant le détail à un trait universel (FR). Peut être vide. */
+  meaning: string
 }
 
 /** Architectural brief produced by the architect model from the conversation. */

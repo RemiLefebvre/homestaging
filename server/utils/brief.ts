@@ -16,10 +16,19 @@ const flexStringArray = z
   .transform(v => (Array.isArray(v) ? v : v.split(/[,;]\s*/)))
   .pipe(z.array(z.string().trim().min(1)).min(1))
 
+// Same coercion as flexString, but allows empty / missing — for the new Barnum
+// fields (`reading`, `meaning`) that we'd rather see degrade to "" than fail
+// the whole brief if the model omits them.
+const flexOptionalString = z
+  .union([z.string(), z.array(z.string()), z.undefined(), z.null()])
+  .transform(v => (Array.isArray(v) ? v.join(', ') : (v ?? '')))
+  .pipe(z.string().trim())
+  .catch('')
+
 // Storytelling: tolerant on purpose. A missing, empty, or off-shape `story`
 // degrades to [] instead of failing the whole brief — the house still renders.
 const storySchema = z
-  .array(z.object({ trigger: flexString, design: flexString }))
+  .array(z.object({ trigger: flexString, design: flexString, meaning: flexOptionalString }))
   .min(1)
   .max(6)
   .catch([])
@@ -56,8 +65,8 @@ export const briefJsonSchema = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['trigger', 'design'],
-        properties: { trigger: { type: 'string' }, design: { type: 'string' } },
+        required: ['trigger', 'design', 'meaning'],
+        properties: { trigger: { type: 'string' }, design: { type: 'string' }, meaning: { type: 'string' } },
       },
     },
     imagePrompt: { type: 'string' },

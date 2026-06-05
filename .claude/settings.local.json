@@ -10,7 +10,8 @@
       "Bash(curl -s \"http://localhost:3001/_nuxt/assets/prompt-suggestions.json?import\")",
       "Bash(file public/base-interiors/*.png public/base-interiors/*.jpg)",
       "Bash(grep -E \"^\\(tsx|ts-node\\)$\")",
-      "Bash(file /Users/remi/Sites/homestaging/public/generated/*.png)"
+      "Bash(file /Users/remi/Sites/homestaging/public/generated/*.png)",
+      "Bash(pnpm exec *)"
     ]
   }
 }
