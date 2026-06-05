@@ -9,6 +9,10 @@ dist
 *.log
 .DS_Store
 
+# Local Claude Code state (per-user, not part of the project)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
 # Generated images (not committed)
 public/generated/*
 !public/generated/.gitkeep
