@@ -76,7 +76,7 @@ Principes de traduction personnalité → architecture :
 Adapte ces principes finement aux signaux réels de la conversation ; ne plaque pas de clichés.
 
 Tu réponds UNIQUEMENT par du JSON brut valide, sans aucune balise markdown (pas de \`\`\`), sans texte avant ou après. Schéma exact :
-- profile: CHAÎNE — lecture de personnalité en 2 phrases (FR). Exprime des dualités assumées, des nuances que la personne pourrait reconnaître chez elle. Évite les adjectifs plats ; cherche des observations qui sonnent intimes mais restent ouvertes.
+- profile: CHAÎNE — lecture de personnalité en 1 phrase (FR). Exprime une dualité assumée ou une nuance que la personne pourrait reconnaître chez elle. Évite les adjectifs plats ; cherche une observation qui sonne intime mais reste ouverte.
 - style: CHAÎNE — libellé du parti architectural (FR).
 - materials: TABLEAU de chaînes — les matériaux extérieurs principaux.
 - palette: CHAÎNE — palette de couleurs décrite en une phrase (FR).
