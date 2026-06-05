@@ -109,6 +109,16 @@
     0% { background-position: 200% 0; }
     100% { background-position: -100% 0; }
   }
+
+  .gallery-scroll {
+    animation: gallery-scroll-up var(--gallery-duration, 60s) linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes gallery-scroll-up {
+    0%   { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
