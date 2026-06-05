@@ -6,12 +6,12 @@ withDefaults(defineProps<{
   hint?: string
   profile?: string | null
 }>(), {
-  message: 'Génération en cours',
-  hint: '~15-20 secondes',
+  message: 'Generating',
+  hint: '~15-20 seconds',
   profile: null,
 })
 
-// Particules en orbite : taille, distance au centre, vitesse et opacité distinctes
+// Orbiting particles: distinct size, distance from centre, speed and opacity
 const orbits = [
   { id: 1, size: 6, inset: 4, duration: 3.2, opacity: 0.9 },
   { id: 2, size: 4, inset: 14, duration: 4.6, opacity: 0.6 },
@@ -28,14 +28,14 @@ const orbits = [
     :transition="{ duration: 0.3 }"
   >
     <div class="relative flex h-32 w-32 items-center justify-center">
-      <!-- Halo lumineux pulsant -->
+      <!-- Pulsing glow halo -->
       <Motion
         class="absolute h-24 w-24 rounded-full bg-gradient-brand blur-2xl"
         :animate="{ scale: [1, 1.35, 1], opacity: [0.35, 0.65, 0.35] }"
         :transition="{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }"
       />
 
-      <!-- Particules en orbite -->
+      <!-- Orbiting particles -->
       <Motion
         v-for="o in orbits"
         :key="o.id"
@@ -49,18 +49,18 @@ const orbits = [
         />
       </Motion>
 
-      <!-- Orbe central qui respire -->
+      <!-- Breathing central orb -->
       <Motion
         class="relative h-14 w-14 overflow-hidden rounded-full bg-gradient-brand shadow-2xl shadow-violet-500/60"
         :animate="{ scale: [1, 1.12, 1] }"
         :transition="{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }"
       >
-        <!-- Reflet pour l'effet de sphère -->
+        <!-- Highlight for the sphere effect -->
         <span class="absolute left-2.5 top-2 h-4 w-4 rounded-full bg-white/70 blur-[6px]" />
       </Motion>
     </div>
 
-    <!-- Profil inféré : surgit dès que l'architecte a parlé, AVANT que l'image n'arrive. -->
+    <!-- Inferred profile: appears as soon as the architect has spoken, BEFORE the image lands. -->
     <Motion
       v-if="profile"
       key="profile"
@@ -70,7 +70,7 @@ const orbits = [
       :transition="{ duration: 0.6, ease: 'easeOut' }"
     >
       <p class="text-[10px] sm:text-xs uppercase tracking-[0.2em] text-violet-300 font-semibold mb-2">
-        Profil inféré
+        Inferred profile
       </p>
       <p class="font-display text-base sm:text-lg leading-snug text-white">
         {{ profile }}

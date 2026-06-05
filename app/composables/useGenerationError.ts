@@ -7,54 +7,54 @@ interface ErrorMessage {
 
 const MESSAGES: Record<ApiErrorCode, ErrorMessage> = {
   MISSING_API_KEY: {
-    title: 'Configuration manquante',
-    hint: 'La clé OpenRouter n’est pas configurée côté serveur. Ajoute NUXT_OPEN_ROUTER_API_KEY dans ton fichier .env puis relance le serveur.',
+    title: 'Missing configuration',
+    hint: 'The OpenRouter API key is not configured on the server. Add NUXT_OPEN_ROUTER_API_KEY to your .env file and restart the server.',
   },
   SOURCE_NOT_FOUND: {
-    title: 'Image introuvable',
-    hint: 'L’image source n’a pas été trouvée. Choisis un autre intérieur de base ou recommence.',
+    title: 'Image not found',
+    hint: 'The source image could not be found. Pick another base interior or start over.',
   },
   INVALID_SOURCE_PATH: {
-    title: 'Chemin invalide',
-    hint: 'Le chemin de l’image est invalide. Recommence en choisissant un intérieur de la liste.',
+    title: 'Invalid path',
+    hint: 'The image path is invalid. Start over by picking an interior from the list.',
   },
   UNSUPPORTED_MIME: {
-    title: 'Format non supporté',
-    hint: 'Seuls les JPEG et PNG sont acceptés. Vérifie le format du fichier source.',
+    title: 'Unsupported format',
+    hint: 'Only JPEG and PNG are accepted. Check the source file format.',
   },
   SOURCE_TOO_LARGE: {
-    title: 'Image trop lourde',
-    hint: 'La limite est de 5 Mo par image. Réduis la taille et réessaie.',
+    title: 'Image too large',
+    hint: 'The limit is 5 MB per image. Reduce the size and try again.',
   },
   EMPTY_PROMPT: {
-    title: 'Message vide',
-    hint: 'Écris quelque chose avant d’envoyer.',
+    title: 'Empty message',
+    hint: 'Type something before sending.',
   },
   PROVIDER_ERROR: {
-    title: 'Service indisponible',
-    hint: 'Le service IA n’a pas répondu. Réessaie dans un instant.',
+    title: 'Service unavailable',
+    hint: 'The AI service did not respond. Try again in a moment.',
   },
   INVALID_PROVIDER_RESPONSE: {
-    title: 'Réponse invalide',
-    hint: 'L’IA n’a pas renvoyé de résultat exploitable. Réessaie dans un instant.',
+    title: 'Invalid response',
+    hint: 'The AI did not return a usable result. Try again in a moment.',
   },
   OUTPUT_TOO_LARGE: {
-    title: 'Image générée trop lourde',
-    hint: 'L’image renvoyée dépasse 5 Mo. Réessaie.',
+    title: 'Generated image too large',
+    hint: 'The returned image exceeds 5 MB. Try again.',
   },
   CONVERSATION_ERROR: {
-    title: 'Conversation interrompue',
-    hint: 'Impossible de poursuivre l’échange. Réessaie d’envoyer ton message.',
+    title: 'Conversation interrupted',
+    hint: 'Unable to continue the exchange. Try sending your message again.',
   },
   CONVERSATION_INCOMPLETE: {
-    title: 'Encore quelques réponses',
-    hint: 'Réponds aux 5 questions avant que l’on puisse construire ta maison.',
+    title: 'A few more answers needed',
+    hint: 'Answer the 5 questions before we can build your house.',
   },
 }
 
 const FALLBACK: ErrorMessage = {
-  title: 'Erreur inattendue',
-  hint: 'Quelque chose s’est mal passé. Réessaie.',
+  title: 'Unexpected error',
+  hint: 'Something went wrong. Try again.',
 }
 
 export function useGenerationError() {

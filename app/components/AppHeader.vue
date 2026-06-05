@@ -21,13 +21,13 @@ function toggleTheme() {
             <UIcon name="i-lucide-sparkles" class="h-4 w-4 text-white" />
           </span>
           <span class="font-display text-lg font-bold leading-none">
-            ta<span class="text-gradient-brand">maison</span>
+            your<span class="text-gradient-brand">house</span>
           </span>
         </NuxtLink>
 
         <span class="hidden sm:inline-block h-5 w-px bg-neutral-300/60 dark:bg-neutral-700/60" />
         <p class="hidden sm:block text-sm text-neutral-500 dark:text-neutral-400">
-          Dis-moi qui tu es, je construis ta maison
+          Tell me who you are, I'll build your house
         </p>
 
         <div class="ml-auto flex items-center gap-2">
@@ -39,13 +39,13 @@ function toggleTheme() {
             :disabled="state.loading"
             @click="reset()"
           >
-            <span class="hidden sm:inline">Recommencer</span>
+            <span class="hidden sm:inline">Start over</span>
           </UButton>
           <UButton
             variant="ghost"
             color="neutral"
             :icon="isDark ? 'i-lucide-sun' : 'i-lucide-moon'"
-            :aria-label="isDark ? 'Activer le mode clair' : 'Activer le mode sombre'"
+            :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
             @click="toggleTheme"
           />
         </div>

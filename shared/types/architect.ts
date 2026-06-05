@@ -14,39 +14,39 @@ export const REQUIRED_ANSWERS = 5
 export interface Fragment {
   /** Hex colour evoked by the answer, normalised to #RRGGBB. */
   color: string
-  /** Short evocative name for that colour, FR (ex: "ocre chaleureux"). */
+  /** Short evocative name for that colour, EN (e.g. "warm ochre"). */
   colorName: string
-  /** One personality / ambiance word, FR (ex: "cosy"). */
+  /** One personality / ambiance word, EN (e.g. "cosy"). */
   keyword: string
-  /** A material or texture suggested by the answer, FR (ex: "bois clair"). */
+  /** A material or texture suggested by the answer, EN (e.g. "light wood"). */
   material: string
 }
 
-/** Un « moment » du storytelling : une réponse de la personne ↔ un choix de design. */
+/** A storytelling "moment": one answer from the person ↔ one design choice. */
 export interface StoryBeat {
-  /** Le détail concret évoqué par la personne, FR (ex : "Felix, ton premier chat"). */
+  /** The concrete detail mentioned by the person, EN (e.g. "Felix, your first cat"). */
   trigger: string
-  /** Le choix architectural qui en découle, FR (ex : "un patio protégé et ensoleillé"). */
+  /** The architectural choice that follows, EN (e.g. "a sheltered, sunlit patio"). */
   design: string
-  /** Mini-interprétation Barnum-style reliant le détail à un trait universel (FR). Peut être vide. */
+  /** Barnum-style mini-interpretation tying the detail to a universal trait (EN). May be empty. */
   meaning: string
 }
 
 /** Architectural brief produced by the architect model from the conversation. */
 export interface HouseBrief {
-  /** Short inferred personality summary, FR (ex: "chaleureux, contemplatif, attaché à la nature"). */
+  /** Short inferred personality summary, EN (e.g. "warm, contemplative, drawn to nature"). */
   profile: string
-  /** Architectural style label, FR. */
+  /** Architectural style label, EN. */
   style: string
   /** Main exterior materials. */
   materials: string[]
-  /** Colour palette, FR. */
+  /** Colour palette, EN. */
   palette: string
-  /** Setting / surroundings + light, FR. */
+  /** Setting / surroundings + light, EN. */
   environment: string
-  /** Note d'intention reliant personnalité ↔ maison (3-4 phrases, FR). */
+  /** Intent note tying personality ↔ house (3-4 sentences, EN). */
   concept: string
-  /** Storytelling : 3-5 moments reliant une réponse précise à un choix de design (FR). */
+  /** Storytelling: 3-5 moments tying a specific answer to a design choice (EN). */
   story: StoryBeat[]
   /** Detailed prompt for the image model (photorealistic architectural exterior). */
   imagePrompt: string

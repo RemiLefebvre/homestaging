@@ -14,7 +14,7 @@ function rand(seed: number): number {
 
 // One bubble per word; if there are few words we repeat them so the air stays full.
 const bubbles = computed(() => {
-  const source = props.words.length ? props.words : ['toi']
+  const source = props.words.length ? props.words : ['you']
   const count = Math.max(source.length, 8)
   return Array.from({ length: count }, (_, i) => {
     const word = source[i % source.length]!

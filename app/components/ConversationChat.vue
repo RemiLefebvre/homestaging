@@ -45,10 +45,10 @@ watch(
 
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100vh-3.5rem)]">
-    <!-- Progression : la maison se construit, la palette se compose, le moodboard se peuple -->
+    <!-- Progress: the house builds up, the palette fills in, the moodboard populates -->
     <MoodboardPanel :fragments="state.fragments" :total="questionsTotal" />
 
-    <!-- Fil de discussion -->
+    <!-- Message thread -->
     <div
       ref="scroller"
       class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-4 py-2"
@@ -77,7 +77,7 @@ watch(
         </div>
       </Motion>
 
-      <!-- Indicateur de saisie -->
+      <!-- Typing indicator -->
       <div v-if="state.loading" class="self-start flex gap-2.5 items-end">
         <span class="shrink-0 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-brand shadow-md shadow-violet-500/30">
           <UIcon name="i-lucide-sparkles" class="h-4 w-4 text-white" />
@@ -98,7 +98,7 @@ watch(
       icon="i-lucide-alert-triangle"
     />
 
-    <!-- Zone de saisie / bouton final -->
+    <!-- Input zone / final button -->
     <div class="py-4">
       <div class="surface-glass-strong rounded-2xl p-3 shadow-2xl shadow-violet-500/5 ring-1 ring-black/5 dark:ring-white/10">
         <template v-if="state.complete">
@@ -109,7 +109,7 @@ watch(
             @click="buildHouse()"
           >
             <UIcon name="i-lucide-home" class="h-4 w-4" />
-            Construis ma maison
+            Build my house
           </button>
         </template>
         <div v-else class="flex items-end gap-2">
@@ -119,7 +119,7 @@ watch(
             class="flex-1"
             :rows="1"
             autoresize
-            :placeholder="state.loading ? 'Patiente un instant…' : 'Ta réponse…'"
+            :placeholder="state.loading ? 'One moment…' : 'Your answer…'"
             :disabled="state.loading"
             @keydown="onKeydown"
           />
@@ -127,7 +127,7 @@ watch(
             type="button"
             class="inline-flex items-center justify-center rounded-xl h-11 w-11 text-white bg-gradient-brand shadow-lg shadow-violet-500/30 hover:scale-[1.03] active:scale-[0.97] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             :disabled="!canSend"
-            :aria-label="'Envoyer'"
+            :aria-label="'Send'"
             @click="submit"
           >
             <UIcon

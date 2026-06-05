@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Motion } from 'motion-v'
 
-useHead({ title: 'Dis-moi qui tu es, je construis ta maison' })
+useHead({ title: 'Tell me who you are, I\'ll build your house' })
 
 const { state, start, profileWords, quickTest } = useArchitect()
 const isDev = import.meta.dev
@@ -33,12 +33,12 @@ const galleryImages = computed(() => gallery.value?.images ?? [])
             <UIcon name="i-lucide-sparkles" class="h-7 w-7 text-white" />
           </span>
           <h1 class="font-display text-3xl sm:text-5xl font-bold leading-tight">
-            Dis-moi qui tu es,<br>
-            <span class="text-gradient-brand">je construis ta maison.</span>
+            Tell me who you are,<br>
+            <span class="text-gradient-brand">I'll build your house.</span>
           </h1>
           <p class="mt-5 text-lg text-neutral-500 dark:text-neutral-400 max-w-md mx-auto">
-            Réponds à 5 questions. À partir de ta personnalité, notre architecte imagine
-            l'extérieur de la maison qui te ressemble.
+            Answer 5 questions. From your personality, our architect imagines
+            the exterior of the house that resembles you.
           </p>
 
           <button
@@ -51,7 +51,7 @@ const galleryImages = computed(() => gallery.value?.images ?? [])
               :name="state.loading ? 'i-lucide-loader-2' : 'i-lucide-message-circle'"
               :class="['h-5 w-5', state.loading && 'animate-spin']"
             />
-            Commencer la conversation
+            Start the conversation
           </button>
 
           <button
@@ -62,7 +62,7 @@ const galleryImages = computed(() => gallery.value?.images ?? [])
             @click="quickTest()"
           >
             <UIcon name="i-lucide-zap" class="h-3.5 w-3.5" />
-            Test rapide (dev)
+            Quick test (dev)
           </button>
         </Motion>
 
@@ -81,22 +81,22 @@ const galleryImages = computed(() => gallery.value?.images ?? [])
     <!-- Conversation -->
     <ConversationChat v-else-if="state.phase === 'chat'" />
 
-    <!-- Génération -->
+    <!-- Generation -->
     <section
       v-else-if="state.phase === 'generating'"
       class="max-w-2xl mx-auto px-4 sm:px-6 h-[calc(100vh-3.5rem)] relative"
     >
       <div class="absolute inset-4 overflow-hidden rounded-3xl bg-neutral-100/40 dark:bg-neutral-900/40">
         <ProgressOverlay
-          message="Construction en cours"
-          hint="Notre architecte dessine ta maison…"
+          message="Building in progress"
+          hint="Our architect is drawing your house…"
           :profile="state.profile"
         />
         <FloatingWords :words="profileWords" class="z-20" />
       </div>
     </section>
 
-    <!-- Résultat -->
+    <!-- Result -->
     <HouseResult v-else-if="state.phase === 'result'" />
   </main>
 </template>

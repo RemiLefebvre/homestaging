@@ -9,7 +9,7 @@ const story = computed(() => state.value.brief?.story ?? [])
 
 <template>
   <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-    <!-- Titre discret : le parti architectural -->
+    <!-- Quiet title: the architectural intent -->
     <Motion
       v-if="state.brief"
       :initial="{ opacity: 0, y: 12 }"
@@ -22,7 +22,7 @@ const story = computed(() => state.value.brief?.story ?? [])
       </h1>
     </Motion>
 
-    <!-- Image de la maison -->
+    <!-- House image -->
     <Motion
       :initial="{ opacity: 0, scale: 0.98 }"
       :animate="{ opacity: 1, scale: 1 }"
@@ -32,12 +32,12 @@ const story = computed(() => state.value.brief?.story ?? [])
       <img
         v-if="state.imageUrl"
         :src="state.imageUrl"
-        alt="La maison qui te ressemble"
+        alt="The house that resembles you"
         class="w-full object-cover bg-neutral-100 dark:bg-neutral-900"
       >
     </Motion>
 
-    <!-- Note d'intention -->
+    <!-- Intent note -->
     <Motion
       :initial="{ opacity: 0, y: 12 }"
       :animate="{ opacity: 1, y: 0 }"
@@ -45,7 +45,7 @@ const story = computed(() => state.value.brief?.story ?? [])
       class="surface-glass rounded-2xl p-6 mt-6"
     >
       <p class="text-xs uppercase tracking-widest text-neutral-400 dark:text-neutral-500 font-semibold mb-3">
-        Note d'intention
+        Intent note
       </p>
       <p class="text-neutral-800 dark:text-neutral-100 leading-relaxed">
         {{ state.concept }}
@@ -53,7 +53,7 @@ const story = computed(() => state.value.brief?.story ?? [])
 
       <div v-if="state.brief" class="mt-5 grid gap-4 sm:grid-cols-2 text-sm">
         <div>
-          <p class="text-neutral-400 dark:text-neutral-500 mb-1">Matières</p>
+          <p class="text-neutral-400 dark:text-neutral-500 mb-1">Materials</p>
           <div class="flex flex-wrap gap-1.5">
             <span
               v-for="m in materials"
@@ -65,13 +65,13 @@ const story = computed(() => state.value.brief?.story ?? [])
           </div>
         </div>
         <div>
-          <p class="text-neutral-400 dark:text-neutral-500 mb-1">Palette &amp; cadre</p>
+          <p class="text-neutral-400 dark:text-neutral-500 mb-1">Palette &amp; setting</p>
           <p class="text-neutral-700 dark:text-neutral-300">{{ state.brief.palette }} — {{ state.brief.environment }}</p>
         </div>
       </div>
     </Motion>
 
-    <!-- Pourquoi cette maison te ressemble -->
+    <!-- Why this house resembles you -->
     <Motion
       v-if="story.length"
       :initial="{ opacity: 0, y: 12 }"
@@ -80,7 +80,7 @@ const story = computed(() => state.value.brief?.story ?? [])
       class="surface-glass rounded-2xl p-6 mt-6"
     >
       <p class="text-xs uppercase tracking-widest text-violet-500 dark:text-violet-400 font-semibold mb-4">
-        Pourquoi cette maison te ressemble
+        Why this house resembles you
       </p>
       <ul class="space-y-5">
         <li
@@ -110,7 +110,7 @@ const story = computed(() => state.value.brief?.story ?? [])
         class="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white bg-gradient-brand shadow-lg shadow-violet-500/30 hover:scale-[1.03] active:scale-[0.98] transition-all"
       >
         <UIcon name="i-lucide-download" class="h-4 w-4" />
-        Télécharger l'image
+        Download image
       </a>
       <UButton
         size="lg"
@@ -119,7 +119,7 @@ const story = computed(() => state.value.brief?.story ?? [])
         icon="i-lucide-rotate-ccw"
         @click="reset()"
       >
-        Recommencer
+        Start over
       </UButton>
     </div>
   </div>

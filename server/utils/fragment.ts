@@ -22,9 +22,9 @@ const flexText = z
 
 const fragmentSchema = z.object({
   color: z.unknown().transform(normalizeHex),
-  colorName: flexText.catch('teinte'),
-  keyword: flexText.catch('singulier'),
-  material: flexText.catch('matière naturelle'),
+  colorName: flexText.catch('shade'),
+  keyword: flexText.catch('singular'),
+  material: flexText.catch('natural material'),
 })
 
 /** JSON Schema handed to OpenRouter structured outputs (strict-capable models). */
