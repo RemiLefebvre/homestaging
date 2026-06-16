@@ -19,60 +19,75 @@ export interface OpenRouterMessage {
   content: string
 }
 
+// Generous ceiling so a long brief (story array + detailed imagePrompt) is never
+// truncated mid-generation. Anthropic on OpenRouter does not default to a high
+// value, so we set it explicitly.
+const MAX_TOKENS = 4096
+
 /**
  * Plain text chat completion via OpenRouter.
  *
- * When `jsonSchema` is provided we ask for OpenRouter structured outputs
- * (`response_format: json_schema`, strict). Support depends on the model — the
- * caller is responsible for a zod fallback if the provider ignores the schema.
+ * We deliberately do NOT use `response_format: json_schema`: for Anthropic models
+ * OpenRouter emulates it via a forced tool call, a fragile path that intermittently
+ * returns an empty message (content/tool_calls/refusal all null → 502). Callers that
+ * need JSON instruct the model in the prompt and parse the text tolerantly (zod).
+ * A single retry absorbs transient empty responses from the provider.
  */
 export async function chatCompletion(params: {
   apiKey: string
   model: string
   messages: OpenRouterMessage[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  jsonSchema?: { name: string; schema: Record<string, any> }
 }): Promise<string> {
-  const { apiKey, model, messages, jsonSchema } = params
+  const { apiKey, model, messages } = params
   const client = getClient(apiKey)
 
-  let response
-  try {
-    response = await client.chat.completions.create({
-      model,
-      messages,
-      ...(jsonSchema
-        ? {
-            response_format: {
-              type: 'json_schema',
-              json_schema: { name: jsonSchema.name, strict: true, schema: jsonSchema.schema },
-            },
-          }
-        : {}),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    throw new ApiError('PROVIDER_ERROR', `OpenRouter chat call failed: ${msg}`)
-  }
-
-  const message = response.choices?.[0]?.message
-  let text = typeof message?.content === 'string' ? message.content : ''
-
-  // When response_format=json_schema is requested, some providers (notably
-  // Anthropic via OpenRouter) return the structured JSON through a forced tool
-  // call instead of message.content, leaving content empty. Fall back to the
-  // tool call arguments so the caller still gets the JSON payload to parse.
-  if (!text.trim()) {
-    const toolArgs = message?.tool_calls?.[0]?.function?.arguments
-    if (typeof toolArgs === 'string' && toolArgs.trim()) {
-      text = toolArgs
+  const attempt = async (): Promise<{ text: string; finishReason: string }> => {
+    let response
+    try {
+      response = await client.chat.completions.create({
+        model,
+        messages,
+        max_tokens: MAX_TOKENS,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      throw new ApiError('PROVIDER_ERROR', `OpenRouter chat call failed: ${msg}`)
     }
+
+    const choice = response.choices?.[0]
+    const message = choice?.message
+    let text = typeof message?.content === 'string' ? message.content : ''
+
+    // Defensive: if a provider ever returns the payload through a tool call
+    // instead of content, still surface it rather than failing.
+    if (!text.trim()) {
+      const toolArgs = message?.tool_calls?.[0]?.function?.arguments
+      if (typeof toolArgs === 'string' && toolArgs.trim()) {
+        text = toolArgs
+      }
+    }
+
+    if (!text.trim()) {
+      console.error(
+        `OpenRouter empty content (finish_reason: ${choice?.finish_reason ?? 'unknown'}); message shape:`,
+        JSON.stringify(message),
+      )
+    }
+    return { text, finishReason: choice?.finish_reason ?? 'unknown' }
+  }
+
+  let { text, finishReason } = await attempt()
+  if (!text.trim()) {
+    // The empty response is transient on Anthropic via OpenRouter — retry once.
+    ;({ text, finishReason } = await attempt())
   }
 
   if (!text.trim()) {
-    console.error('OpenRouter empty content; message shape:', JSON.stringify(message))
-    throw new ApiError('INVALID_PROVIDER_RESPONSE', 'OpenRouter returned no text content')
+    throw new ApiError(
+      'INVALID_PROVIDER_RESPONSE',
+      `OpenRouter returned no text content (finish_reason: ${finishReason})`,
+    )
   }
   return text
 }

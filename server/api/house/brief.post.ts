@@ -1,7 +1,7 @@
 import { defineEventHandler, readValidatedBody } from 'h3'
 import { z } from 'zod'
 import { REQUIRED_ANSWERS } from '~~/shared/types/architect'
-import { briefJsonSchema, parseBrief } from '../../utils/brief'
+import { parseBrief } from '../../utils/brief'
 import { ApiError, withErrorHandling } from '../../utils/errors'
 import { type OpenRouterMessage, chatCompletion } from '../../utils/openrouter'
 import { ARCHITECT_SYSTEM_PROMPT, buildFragmentHint } from '../../utils/prompts'
@@ -61,7 +61,6 @@ export default defineEventHandler(async (event) => {
       apiKey,
       model: config.openRouterTextModel,
       messages: chat,
-      jsonSchema: { name: 'house_brief', schema: briefJsonSchema as unknown as Record<string, unknown> },
     })
     const brief = parseBrief(rawBrief)
 

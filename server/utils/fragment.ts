@@ -27,19 +27,6 @@ const fragmentSchema = z.object({
   material: flexText.catch('matière naturelle'),
 })
 
-/** JSON Schema handed to OpenRouter structured outputs (strict-capable models). */
-export const fragmentJsonSchema = {
-  type: 'object',
-  additionalProperties: false,
-  required: ['color', 'colorName', 'keyword', 'material'],
-  properties: {
-    color: { type: 'string' },
-    colorName: { type: 'string' },
-    keyword: { type: 'string' },
-    material: { type: 'string' },
-  },
-} as const
-
 /**
  * Parse the model's answer into a Fragment. Returns null (never throws) on any
  * failure so the conversation turn can always succeed — the moodboard simply

@@ -2,7 +2,7 @@ import { defineEventHandler, readValidatedBody } from 'h3'
 import { z } from 'zod'
 import type { Fragment } from '~~/shared/types/architect'
 import { REQUIRED_ANSWERS } from '~~/shared/types/architect'
-import { fragmentJsonSchema, parseFragment } from '../utils/fragment'
+import { parseFragment } from '../utils/fragment'
 import { ApiError, withErrorHandling } from '../utils/errors'
 import { type OpenRouterMessage, chatCompletion } from '../utils/openrouter'
 import { FRAGMENT_SYSTEM_PROMPT, buildConversationSystemPrompt } from '../utils/prompts'
@@ -48,7 +48,6 @@ export default defineEventHandler(async (event) => {
           apiKey,
           model: config.openRouterTextModel,
           messages: [{ role: 'system', content: FRAGMENT_SYSTEM_PROMPT }, ...messages],
-          jsonSchema: { name: 'mood_fragment', schema: fragmentJsonSchema as unknown as Record<string, unknown> },
         }).then(parseFragment).catch(() => null)
       : Promise.resolve(null)
 

@@ -44,35 +44,6 @@ export const briefSchema = z.object({
   imagePrompt: flexString,
 })
 
-/**
- * JSON Schema handed to OpenRouter structured outputs (strict). Models that
- * support it return conforming JSON; others ignore it and we rely on the zod
- * parse below as the fallback.
- */
-export const briefJsonSchema = {
-  type: 'object',
-  additionalProperties: false,
-  required: ['profile', 'style', 'materials', 'palette', 'environment', 'concept', 'story', 'imagePrompt'],
-  properties: {
-    profile: { type: 'string' },
-    style: { type: 'string' },
-    materials: { type: 'array', items: { type: 'string' } },
-    palette: { type: 'string' },
-    environment: { type: 'string' },
-    concept: { type: 'string' },
-    story: {
-      type: 'array',
-      items: {
-        type: 'object',
-        additionalProperties: false,
-        required: ['trigger', 'design', 'meaning'],
-        properties: { trigger: { type: 'string' }, design: { type: 'string' }, meaning: { type: 'string' } },
-      },
-    },
-    imagePrompt: { type: 'string' },
-  },
-} as const
-
 /** Parse the model's text answer into a validated HouseBrief, tolerating ```json fences. */
 export function parseBrief(raw: string): HouseBrief {
   const cleaned = raw.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')
