@@ -15,7 +15,7 @@ export const QUESTION_THEMES = [
   { id: 'season-moment', topic: 'sa saison préférée et son moment de la journée favori' },
   { id: 'happy-place', topic: 'un endroit où elle se sent parfaitement bien — d\'une grande ville vibrante à une cabane isolée' },
   { id: 'desert-island-object', topic: 'un objet qu\'elle emporterait sur une île déserte' },
-  { id: 'described-by-others', topic: 'le mot que ses proches utiliseraient pour la décrire' },
+  { id: 'favorite-scent', topic: 'son odeur, son parfum ou sa fragrance préférée' },
 ] as const
 
 // Safety net: the array must hold exactly the required number of themes.
@@ -82,7 +82,7 @@ Tu réponds UNIQUEMENT par du JSON brut valide, sans aucune balise markdown (pas
 - palette: CHAÎNE — palette de couleurs décrite en une phrase (FR).
 - environment: CHAÎNE — cadre / environnement + lumière (FR).
 - concept: CHAÎNE — note d'intention de 3-4 phrases reliant explicitement la personnalité à la maison (FR).
-- story: TABLEAU d'objets { trigger, design, meaning } — 3 à 5 moments. Chaque moment relie UNE réponse PRÉCISE de la personne à UN choix de design concret. "trigger" = le détail réel qu'elle a donné, cité concrètement (nom de l'animal, saison, lieu, objet, mot), court (FR). "design" = le choix architectural qui en découle, court et concret (FR). "meaning" = une mini-interprétation qui sonne personnelle (ex : « tu cherches des refuges plutôt que des vitrines », « tu n'aimes pas qu'on te dise ce que tu dois aimer »), assez ouverte pour que la plupart des gens s'y reconnaissent, courte (FR). Ne reformule pas le concept global : ancre chaque moment dans une réponse identifiable.
+- story: TABLEAU d'objets { trigger, design, meaning } — 3 à 5 moments. Chaque moment relie UNE réponse PRÉCISE de la personne à UN choix de design concret. "trigger" = le détail réel qu'elle a donné, cité concrètement (nom de l'animal, saison, lieu, objet, odeur/parfum), court (FR). "design" = le choix architectural qui en découle, court et concret (FR). "meaning" = une mini-interprétation qui sonne personnelle (ex : « tu cherches des refuges plutôt que des vitrines », « tu n'aimes pas qu'on te dise ce que tu dois aimer »), assez ouverte pour que la plupart des gens s'y reconnaissent, courte (FR). Ne reformule pas le concept global : ancre chaque moment dans une réponse identifiable.
 - imagePrompt: CHAÎNE — prompt détaillé EN ANGLAIS pour un modèle de génération d'image : rendu photoréaliste de l'extérieur de la maison, vue grand-angle, lumière naturelle, qualité photographie d'architecture. Décris style, matériaux, volumes, environnement et ambiance.
 
 IMPORTANT : "materials" et "story" sont des tableaux ; tous les autres champs sont des chaînes de caractères simples.`
