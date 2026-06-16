@@ -5,6 +5,53 @@ const { state, reset } = useArchitect()
 
 const materials = computed(() => state.value.brief?.materials ?? [])
 const story = computed(() => state.value.brief?.story ?? [])
+
+function printImage() {
+  const url = state.value.imageUrl
+  if (!url) return
+
+  const iframe = document.createElement('iframe')
+  iframe.style.position = 'fixed'
+  iframe.style.right = '0'
+  iframe.style.bottom = '0'
+  iframe.style.width = '0'
+  iframe.style.height = '0'
+  iframe.style.border = '0'
+
+  iframe.onload = () => {
+    const doc = iframe.contentDocument
+    if (!doc) return
+    // Empty title + zero @page margin remove the browser's auto header/footer
+    // (date and page title) from the printed page.
+    doc.title = ''
+    const style = doc.createElement('style')
+    style.textContent = `
+      @page { margin: 0 }
+      html, body { margin: 0; height: 100%; }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 0 10%;
+        box-sizing: border-box;
+      }
+      img { max-width: 100%; max-height: 100%; }
+    `
+    doc.head.appendChild(style)
+    const img = doc.createElement('img')
+    img.src = url
+    img.onload = () => {
+      iframe.contentWindow?.focus()
+      iframe.contentWindow?.print()
+    }
+    const cleanup = () => setTimeout(() => iframe.remove(), 500)
+    iframe.contentWindow?.addEventListener('afterprint', cleanup)
+    doc.body.appendChild(img)
+  }
+
+  document.body.appendChild(iframe)
+}
 </script>
 
 <template>
@@ -103,15 +150,15 @@ const story = computed(() => state.value.brief?.story ?? [])
 
     <!-- Actions -->
     <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-      <a
+      <button
         v-if="state.imageUrl"
-        :href="state.imageUrl"
-        download
+        type="button"
         class="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white bg-gradient-brand shadow-lg shadow-violet-500/30 hover:scale-[1.03] active:scale-[0.98] transition-all"
+        @click="printImage()"
       >
-        <UIcon name="i-lucide-download" class="h-4 w-4" />
-        Télécharger l'image
-      </a>
+        <UIcon name="i-lucide-printer" class="h-4 w-4" />
+        Imprimer
+      </button>
       <UButton
         size="lg"
         variant="soft"
