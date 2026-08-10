@@ -12,7 +12,9 @@ const bodySchema = z.object({
     .array(
       z.object({
         role: z.enum(['user', 'assistant']),
-        content: z.string(),
+        // Bound each turn so a huge paste can't inflate the token bill (the whole
+        // transcript is resent every turn, to both the reply and fragment models).
+        content: z.string().max(2000),
       }),
     )
     .max(40),
