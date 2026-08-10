@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <!-- Matches .bg-gradient-brand: linear-gradient(110deg, #8b5cf6, #d946ef 45%, #22d3ee) -->
+    <linearGradient id="brand" x1="0.03" y1="0.329" x2="0.97" y2="0.671">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="0.45" stop-color="#d946ef"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#brand)"/>
+  <!-- i-lucide-sparkles, white, centered (24u icon scaled 0.8 → 19.2u, offset 6.4) -->
+  <g transform="translate(6.4 6.4) scale(0.8)" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+    <path d="M20 3v4"/>
+    <path d="M22 5h-4"/>
+    <path d="M4 17v2"/>
+    <path d="M5 18H3"/>
+  </g>
+</svg>
