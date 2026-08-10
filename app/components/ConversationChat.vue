@@ -100,7 +100,14 @@ watch(
 
     <!-- Input zone / final action -->
     <div class="py-4">
-      <div class="surface-glass-strong rounded-2xl p-3 shadow-2xl shadow-violet-500/5 ring-1 ring-black/5 dark:ring-white/10">
+      <div class="relative rounded-2xl">
+        <!-- Rotating gradient halo: bright while the model replies, barely-there otherwise -->
+        <div
+          class="loading-glow"
+          :class="{ 'loading-glow--idle': !state.loading }"
+          aria-hidden="true"
+        />
+        <div class="relative z-10 surface-glass-strong rounded-2xl p-3 shadow-2xl shadow-violet-500/5 ring-1 ring-black/5 dark:ring-white/10">
         <template v-if="state.complete">
           <button
             type="button"
@@ -135,6 +142,7 @@ watch(
               :class="['h-5 w-5', state.loading && 'animate-spin']"
             />
           </button>
+        </div>
         </div>
       </div>
     </div>

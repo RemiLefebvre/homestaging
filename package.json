@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxt build && node scripts/copy-libvips.mjs",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -39,6 +39,12 @@
     "overrides": {
       "@vueuse/core": "13.9.0",
       "@vueuse/shared": "13.9.0"
+    },
+    "onlyBuiltDependencies": ["sharp"],
+    "supportedArchitectures": {
+      "os": ["current", "linux"],
+      "cpu": ["current", "x64"],
+      "libc": ["current", "glibc"]
     }
   }
 }
