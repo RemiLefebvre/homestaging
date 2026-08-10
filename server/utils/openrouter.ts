@@ -7,9 +7,14 @@ const BASE_URL = 'https://openrouter.ai/api/v1'
 
 let cachedClient: OpenAI | null = null
 
+// Cap a single call at 60s (image gen usually lands in 10-20s). The SDK still
+// retries transient errors, so a stuck provider fails fast instead of holding
+// the serverless function open toward its 300s ceiling. Default is 10 minutes.
+const REQUEST_TIMEOUT_MS = 60_000
+
 function getClient(apiKey: string): OpenAI {
   if (!cachedClient) {
-    cachedClient = new OpenAI({ apiKey, baseURL: BASE_URL })
+    cachedClient = new OpenAI({ apiKey, baseURL: BASE_URL, timeout: REQUEST_TIMEOUT_MS })
   }
   return cachedClient
 }

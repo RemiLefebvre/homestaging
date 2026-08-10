@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
     const fragmentPromise: Promise<Fragment | null> = userAnswers >= 1
       ? chatCompletion({
           apiKey,
-          model: config.openRouterTextModel,
+          model: config.openRouterFragmentModel,
           messages: [{ role: 'system', content: FRAGMENT_SYSTEM_PROMPT }, ...messages],
         }).then(parseFragment).catch(() => null)
       : Promise.resolve(null)

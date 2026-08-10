@@ -1,4 +1,4 @@
-import { defineEventHandler } from 'h3'
+import { defineEventHandler, setResponseHeader } from 'h3'
 import { list } from '@vercel/blob'
 import { GALLERY_BLOB_PREFIX } from '../utils/storage'
 
@@ -9,7 +9,10 @@ import { GALLERY_BLOB_PREFIX } from '../utils/storage'
  * megabyte from Blob instead of 100+ MB. Best-effort: any error (no Blob token,
  * transient provider hiccup) degrades to an empty list so the homepage still renders.
  */
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  // Short shared cache: collapses redundant Blob list() calls when several
+  // visitors land at once. Content is non-sensitive (public decorative URLs).
+  setResponseHeader(event, 'Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
   try {
     const { blobs } = await list({ prefix: GALLERY_BLOB_PREFIX, limit: 12 })
     const sorted = [...blobs].sort(

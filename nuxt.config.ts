@@ -7,6 +7,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     openRouterApiKey: '',
     openRouterTextModel: 'anthropic/claude-sonnet-4',
+    // Decorative moodboard fragments run on a cheaper/faster model than the main
+    // architect: they're best-effort and tiny, so paying Sonnet rates 5x per user
+    // isn't worth it. Override via NUXT_OPEN_ROUTER_FRAGMENT_MODEL.
+    openRouterFragmentModel: 'anthropic/claude-haiku-4.5',
     // Site-wide password gate. Empty = public mode (no gate). Set via NUXT_SITE_PASSWORD.
     sitePassword: '',
   },
