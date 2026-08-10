@@ -50,6 +50,10 @@ const MESSAGES: Record<ApiErrorCode, ErrorMessage> = {
     title: 'Encore quelques réponses',
     hint: 'Réponds aux 5 questions avant que l’on puisse construire ta maison.',
   },
+  UNAUTHORIZED: {
+    title: 'Session expirée',
+    hint: 'Recharge la page et saisis à nouveau le mot de passe pour continuer.',
+  },
 }
 
 const FALLBACK: ErrorMessage = {
