@@ -133,7 +133,7 @@
       transparent 360deg
     );
     filter: blur(9px);
-    opacity: 0.95;
+    opacity: 0.65;
     pointer-events: none;
     animation: glow-rotate 2s linear infinite;
     transition: opacity 0.6s ease, filter 0.6s ease;
