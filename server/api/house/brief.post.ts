@@ -50,12 +50,22 @@ export default defineEventHandler(async (event) => {
     const apiKey = config.openRouterApiKey
     if (!apiKey) throw new ApiError('MISSING_API_KEY', 'OPEN_ROUTER_API_KEY not configured')
 
+    // The transcript ends with the host's closing message. Sent as-is, that
+    // trailing assistant turn is read as a prefill by Anthropic (via OpenRouter),
+    // which then stops with empty content (finish_reason: stop → 502). Flatten it
+    // into a single user turn so the model always gets a clear turn to answer.
+    const transcript = messages
+      .map(m => `${m.role === 'user' ? 'Personne' : 'Hôte'} : ${m.content}`)
+      .join('\n')
     const chat: OpenRouterMessage[] = [
       { role: 'system', content: ARCHITECT_SYSTEM_PROMPT },
       ...(fragments && fragments.length
         ? [{ role: 'system', content: buildFragmentHint(fragments) } as OpenRouterMessage]
         : []),
-      ...messages,
+      {
+        role: 'user',
+        content: `Voici la transcription de la conversation :\n\n${transcript}\n\nConçois la maison et réponds UNIQUEMENT par le JSON demandé.`,
+      },
     ]
     const rawBrief = await chatCompletion({
       apiKey,
