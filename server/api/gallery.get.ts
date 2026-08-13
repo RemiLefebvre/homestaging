@@ -1,6 +1,6 @@
 import { defineEventHandler, setResponseHeader } from 'h3'
 import { list } from '@vercel/blob'
-import { GALLERY_BLOB_PREFIX } from '../utils/storage'
+import { GALLERY_BLOB_PREFIX } from '../utils/blob-store'
 
 /** How many thumbnails the homepage background shows. */
 const GALLERY_SIZE = 12

@@ -17,3 +17,6 @@ dist
 public/generated/*
 !public/generated/.gitkeep
 .vercel
+
+# Prod import output (contains contact PII — never commit)
+exports

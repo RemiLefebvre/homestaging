@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// Hidden once a house is validated: the thank-you screen is a deliberate dead end.
+const { state } = useArchitect()
+
 useHead({
   link: [
     { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
@@ -12,7 +15,7 @@ useHead({
 <template>
   <UApp>
     <MeshBackground />
-    <AppHeader />
+    <AppHeader v-if="!state.validated" />
     <NuxtPage />
   </UApp>
 </template>

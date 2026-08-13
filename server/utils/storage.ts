@@ -1,89 +1,109 @@
 import { randomUUID } from 'node:crypto'
 import { del, list, put } from '@vercel/blob'
 import sharp from 'sharp'
-import { extensionForMime, type OutputMime, validateOutputImage } from './image'
-
-/**
- * Vercel Blob prefix under which generated houses are stored. Keeping a stable
- * prefix lets the gallery endpoint list ONLY our images (in case other features
- * later write blobs of their own).
- */
-export const GENERATED_BLOB_PREFIX = 'generated/'
-
-/**
- * Prefix for the small decorative thumbnails shown as the homepage background.
- * Full-res renders (~2MB PNG) are far too heavy to serve 12+ at a time, so the
- * gallery lists these ~512px WebP versions instead — a ~40x smaller transfer.
- */
-export const GALLERY_BLOB_PREFIX = 'gallery/'
+import type { LeadForm, StoredLead } from '~~/shared/types/lead'
+import { extensionForMime, validateOutputImage } from './image'
+import { ApiError } from './errors'
+import { GENERATED_BLOB_PREFIX, GALLERY_BLOB_PREFIX, LEADS_BLOB_PREFIX, PENDING_BLOB_PREFIX } from './blob-store'
 
 /** Edge of the square gallery thumbnail, in px. */
 const THUMB_SIZE = 512
 
-/**
- * Hard cap on how many full-res renders we keep in Blob. Nothing reads them back
- * except the gallery (newest 12), yet each generation adds ~2MB forever, so we
- * prune the oldest beyond this cap on every save. Override via MAX_STORED_IMAGES.
- */
-const MAX_STORED_IMAGES = Number(process.env.MAX_STORED_IMAGES) || 25
+/** A pending render older than this is considered abandoned and pruned. */
+const PENDING_TTL_MS = 60 * 60 * 1000 // 1h
 
 /**
- * Persist a generated image to Vercel Blob (read-write storage that works in
- * Vercel serverless functions — the local filesystem is read-only at runtime).
+ * Persist a freshly generated image to a PENDING slot in Vercel Blob. Nothing is
+ * kept long-term here: the render is only promoted to `generated/` when the user
+ * validates. Returns a public CDN URL (cheap to display) plus the UUID that keys
+ * every later step (promote / discard).
  *
  * Requires `BLOB_READ_WRITE_TOKEN` in the environment. In production, Vercel
  * injects it automatically when a Blob store is linked to the project. Locally,
  * use `vercel env pull` (or set it manually in `.env`).
  */
-export async function saveGeneratedImage(
+export async function savePendingImage(
   buffer: Buffer,
-): Promise<{ url: string; mimeType: OutputMime }> {
+): Promise<{ imageUrl: string; pendingId: string }> {
   const mime = validateOutputImage(buffer)
   const ext = extensionForMime(mime)
   const id = randomUUID()
 
-  const blob = await put(`${GENERATED_BLOB_PREFIX}${id}.${ext}`, buffer, {
+  const blob = await put(`${PENDING_BLOB_PREFIX}${id}.${ext}`, buffer, {
     access: 'public',
     contentType: mime,
-    // We mint our own UUID — don't let the SDK append its own random suffix.
     addRandomSuffix: false,
   })
 
-  // Decorative-only: never let a thumbnail failure break the user's render.
-  await saveGalleryThumb(id, buffer).catch((err) => {
-    console.error(`[gallery] thumbnail failed for ${id}:`, err)
+  // Best-effort: sweep abandoned pending renders (tab closed without a choice).
+  // Never let this break the user's render.
+  await cleanupStalePending().catch((err) => {
+    console.error('[storage] pending cleanup failed:', err)
   })
 
-  // Best-effort storage cap: pruning runs after the new blob is written (so the
-  // fresh render always survives) and must never break the user's render.
-  await pruneOldImages().catch((err) => {
-    console.error('[storage] prune failed:', err)
-  })
-
-  return { url: blob.url, mimeType: mime }
+  return { imageUrl: blob.url, pendingId: id }
 }
 
 /**
- * Enforce MAX_STORED_IMAGES by deleting the oldest renders once the cap is
- * exceeded. Keyed off the `generated/` list (the source of truth for a house);
- * the matching gallery thumbnail is found by reusing the same UUID, so a single
- * list() + del() cover both prefixes with no separate metadata store.
+ * Promote a validated pending render: create its gallery thumbnail, write the
+ * full-res render + the private lead sidecar (same UUID), then drop the pending
+ * blob. Throws SOURCE_NOT_FOUND if the pending render is gone (expired/invalid).
  */
-async function pruneOldImages(): Promise<void> {
-  const { blobs } = await list({ prefix: GENERATED_BLOB_PREFIX, limit: 1000 })
-  if (blobs.length <= MAX_STORED_IMAGES) return
+export async function promotePendingImage(
+  pendingId: string,
+  contact: LeadForm,
+): Promise<{ imageUrl: string }> {
+  const { blobs } = await list({ prefix: `${PENDING_BLOB_PREFIX}${pendingId}`, limit: 1 })
+  const pending = blobs[0]
+  if (!pending) {
+    throw new ApiError('SOURCE_NOT_FOUND', 'Pending render not found or expired')
+  }
 
-  const stale = [...blobs]
-    .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime())
-    .slice(MAX_STORED_IMAGES)
+  const res = await fetch(pending.url)
+  if (!res.ok) throw new ApiError('SOURCE_NOT_FOUND', `Pending render unreadable (HTTP ${res.status})`)
+  const buffer = Buffer.from(await res.arrayBuffer())
+  const mime = validateOutputImage(buffer)
+  const ext = extensionForMime(mime)
 
-  // Each stale render + its thumbnail (same UUID under the gallery/ prefix).
-  const toDelete = stale.flatMap((b) => {
-    const id = b.pathname.slice(GENERATED_BLOB_PREFIX.length).replace(/\.[^.]+$/, '')
-    return [b.pathname, `${GALLERY_BLOB_PREFIX}${id}.webp`]
+  // Decorative-only: never let a thumbnail failure break validation.
+  await saveGalleryThumb(pendingId, buffer).catch((err) => {
+    console.error(`[gallery] thumbnail failed for ${pendingId}:`, err)
   })
 
-  await del(toDelete)
+  const generated = await put(`${GENERATED_BLOB_PREFIX}${pendingId}.${ext}`, buffer, {
+    access: 'public',
+    contentType: mime,
+    addRandomSuffix: false,
+    // Re-validation after a partial failure hits the same UUID — overwrite, don't throw.
+    allowOverwrite: true,
+  })
+
+  const lead: StoredLead = { ...contact, imageUrl: generated.url, createdAt: new Date().toISOString() }
+  // Store is public — access:'private' is rejected. The random suffix turns the lead
+  // URL into an unguessable capability (never returned to the client), keeping PII out of reach.
+  await put(`${LEADS_BLOB_PREFIX}${pendingId}.json`, JSON.stringify(lead), {
+    access: 'public',
+    contentType: 'application/json',
+    addRandomSuffix: true,
+  })
+
+  await del(pending.pathname)
+
+  return { imageUrl: generated.url }
+}
+
+/** Drop an un-validated pending render (Recommencer). Best-effort, ignores absence. */
+export async function discardPendingImage(pendingId: string): Promise<void> {
+  const { blobs } = await list({ prefix: `${PENDING_BLOB_PREFIX}${pendingId}`, limit: 1 })
+  if (blobs[0]) await del(blobs[0].pathname)
+}
+
+/** Delete pending renders older than PENDING_TTL_MS. */
+async function cleanupStalePending(): Promise<void> {
+  const { blobs } = await list({ prefix: PENDING_BLOB_PREFIX, limit: 1000 })
+  const cutoff = Date.now() - PENDING_TTL_MS
+  const stale = blobs.filter(b => b.uploadedAt.getTime() < cutoff).map(b => b.pathname)
+  if (stale.length) await del(stale)
 }
 
 /** Write a small square WebP thumbnail of a render for the homepage gallery. */
@@ -97,5 +117,6 @@ async function saveGalleryThumb(id: string, source: Buffer): Promise<void> {
     access: 'public',
     contentType: 'image/webp',
     addRandomSuffix: false,
+    allowOverwrite: true,
   })
 }

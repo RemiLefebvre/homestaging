@@ -2,7 +2,7 @@ import { defineEventHandler, readValidatedBody } from 'h3'
 import { z } from 'zod'
 import { ApiError, withErrorHandling } from '../../utils/errors'
 import { generateImageFromText } from '../../utils/openrouter'
-import { saveGeneratedImage } from '../../utils/storage'
+import { savePendingImage } from '../../utils/storage'
 import { applyWatermark } from '../../utils/watermark'
 
 const bodySchema = z.object({
@@ -28,8 +28,9 @@ export default defineEventHandler(async (event) => {
 
     const generated = await generateImageFromText({ apiKey, prompt: imagePrompt })
     const branded = await applyWatermark(generated.buffer)
-    const { url } = await saveGeneratedImage(branded)
+    // Stored as PENDING only — promoted to a permanent render when the user validates.
+    const { imageUrl, pendingId } = await savePendingImage(branded)
 
-    return { imageUrl: url }
+    return { imageUrl, pendingId }
   })
 })

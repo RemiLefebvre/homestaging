@@ -42,6 +42,7 @@ L'app tourne sur http://localhost:3000.
 | `pnpm build` | Build Nuxt, puis copie des binaires libvips pour Vercel (`scripts/copy-libvips.mjs`) |
 | `pnpm typecheck` | Vérification des types (`vue-tsc`) |
 | `pnpm watermark:preview` | Aperçu CLI du filigrane sans passer par l'app (`scripts/watermark-preview.mts`) |
+| `pnpm import:prod` | Télécharge le store Blob (rendus + coordonnées + `leads.csv`) dans `exports/`. `--prune` (avec `--keep=N`, défaut 25) supprime à la place les rendus les plus anciens côté serveur — les leads sont conservés (`scripts/import-prod.mts`) |
 
 ## Variables d'environnement
 
@@ -51,10 +52,10 @@ L'app tourne sur http://localhost:3000.
 | `BLOB_READ_WRITE_TOKEN` | oui | Token d'écriture pour [Vercel Blob](https://vercel.com/docs/storage/vercel-blob). Récupéré automatiquement en prod si un store Blob est lié au projet ; en local : `vercel env pull` ou copie depuis le dashboard |
 | `NUXT_OPEN_ROUTER_TEXT_MODEL` | non | Modèle texte de l'architecte (défaut : `anthropic/claude-sonnet-4`) |
 | `NUXT_OPEN_ROUTER_FRAGMENT_MODEL` | non | Modèle des fragments de moodboard (défaut : `anthropic/claude-haiku-4.5`) |
-| `MAX_STORED_IMAGES` | non | Nombre max de rendus conservés sur Blob ; les plus anciens sont élagués à chaque sauvegarde (défaut : `25`) |
+| `MAX_STORED_IMAGES` | non | Plafond par défaut de l'élagage **manuel** `pnpm import:prod --prune` (défaut : `25`). Il n'y a plus d'élagage automatique à chaque sauvegarde |
 | `NUXT_SITE_PASSWORD` | non | Si défini, l'app est protégée par un mot de passe (`POST /api/auth`). Vide ou absent : accès public |
 
-Les maisons générées sont stockées sur Vercel Blob (préfixe `generated/` pour les rendus pleine résolution, `gallery/` pour les vignettes WebP) — pas dans le repo.
+Les maisons sont stockées sur Vercel Blob — pas dans le repo. Un rendu passe d'abord par `pending/` (temporaire, nettoyé après 1 h s'il n'est pas validé) ; à la validation du formulaire il est promu en `generated/` (pleine résolution) + `gallery/` (vignette WebP), et les coordonnées sont écrites en `leads/{id}-{suffixe}.json` — le store est public, mais le suffixe aléatoire rend l'URL non devinable et elle n'est jamais renvoyée au client (PII).
 
 ## Structure
 
@@ -62,7 +63,7 @@ Les maisons générées sont stockées sur Vercel Blob (préfixe `generated/` po
 app/         # pages, composants, composables Vue
 server/      # endpoints Nitro + utils (openrouter, brief, image, storage, watermark)
 shared/      # types partagés app ↔ server
-scripts/     # copy-libvips (build Vercel), watermark-preview (CLI)
+scripts/     # copy-libvips (build Vercel), watermark-preview + import-prod (CLI)
 public/      # assets statiques (logo de marque, intérieurs de base)
 ```
 

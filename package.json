@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
-    "watermark:preview": "tsx scripts/watermark-preview.mts"
+    "watermark:preview": "tsx scripts/watermark-preview.mts",
+    "import:prod": "tsx --env-file=.env scripts/import-prod.mts"
   },
   "dependencies": {
     "@nuxt/ui": "^3.0.0",

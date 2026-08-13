@@ -1,5 +1,6 @@
 import type { ChatMessage, Fragment, HouseBrief } from '~~/shared/types/architect'
 import { REQUIRED_ANSWERS } from '~~/shared/types/architect'
+import type { LeadForm } from '~~/shared/types/lead'
 
 interface ArchitectError {
   code: string
@@ -17,6 +18,8 @@ interface ArchitectState {
   loading: boolean
   error: ArchitectError | null
   imageUrl: string | null
+  pendingId: string | null
+  validated: boolean
   concept: string | null
   profile: string | null
   brief: HouseBrief | null
@@ -31,6 +34,8 @@ function createState(): ArchitectState {
     loading: false,
     error: null,
     imageUrl: null,
+    pendingId: null,
+    validated: false,
     concept: null,
     profile: null,
     brief: null,
@@ -147,11 +152,12 @@ export function useArchitect() {
       const profileShownAt = Date.now()
 
       // 2) Slow image call — runs while the user is reading the profile.
-      const imgRes = await callApi<{ imageUrl: string }>(
+      const imgRes = await callApi<{ imageUrl: string, pendingId: string }>(
         '/api/house/image',
         { imagePrompt: briefRes.brief.imagePrompt },
       )
       state.value.imageUrl = imgRes.imageUrl
+      state.value.pendingId = imgRes.pendingId
 
       // 3) Guarantee the profile stayed up long enough to be read before swapping
       //    to the result. Image is usually slower than this, so it's a safety floor.
@@ -193,6 +199,38 @@ export function useArchitect() {
     state.value = createState()
   }
 
+  /** "Valider": store the current render + contact info. Returns true on success. */
+  async function saveHouse(form: LeadForm): Promise<boolean> {
+    if (state.value.loading || !state.value.pendingId || state.value.validated) return false
+    state.value.error = null
+    state.value.loading = true
+    try {
+      await callApi('/api/house/save', { pendingId: state.value.pendingId, ...form })
+      state.value.validated = true
+      return true
+    } catch (err) {
+      handleError(err)
+      return false
+    } finally {
+      state.value.loading = false
+    }
+  }
+
+  /**
+   * "Recommencer" from the result screen: discard the un-validated render (nothing
+   * is stored), reset everything, and land straight on a fresh conversation.
+   */
+  async function restart() {
+    if (state.value.loading) return
+    const { pendingId, validated } = state.value
+    // Fire-and-forget: freeing the pending blob must not delay the new chat.
+    if (pendingId && !validated) {
+      callApi('/api/house/discard', { pendingId }).catch(() => {})
+    }
+    state.value = createState()
+    await start()
+  }
+
   return {
     state: readonly(state),
     answersGiven,
@@ -203,5 +241,7 @@ export function useArchitect() {
     buildHouse,
     quickTest,
     reset,
+    saveHouse,
+    restart,
   }
 }
