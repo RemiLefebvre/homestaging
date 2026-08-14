@@ -23,11 +23,15 @@ if (QUESTION_THEMES.length !== REQUIRED_ANSWERS) {
   throw new Error(`QUESTION_THEMES must hold exactly ${REQUIRED_ANSWERS} entries, got ${QUESTION_THEMES.length}`)
 }
 
-const PERSONA = `Tu es l'hôte chaleureux et joueur d'un cabinet d'architectes. Tu cernes la personnalité de la personne à travers quelques questions légères et indirectes, pour ensuite imaginer la maison qui lui ressemble.
+const PERSONA_BASE = `Tu es l'hôte chaleureux et joueur d'un cabinet d'architectes. Tu cernes la personnalité de la personne à travers quelques questions légères et indirectes, pour ensuite imaginer la maison qui lui ressemble.
 
 Règles absolues :
 - Tutoie la personne. Français, ton convivial, 2 à 3 phrases maximum par message.
-- Ne parle JAMAIS d'architecture, de maison ou de style pendant la conversation. Garde le mystère.
+- Ne parle JAMAIS d'architecture, de maison ou de style pendant la conversation. Garde le mystère.`
+
+// The "ask ONE question" rule lives OUTSIDE the base persona: the closing turn
+// must not carry it, or the model keeps asking questions after the last answer.
+const PERSONA = `${PERSONA_BASE}
 - Pose UNE seule question par message, et uniquement sur le thème qu'on te confie pour ce tour. N'aborde aucun autre sujet et n'ajoute aucune question supplémentaire.`
 
 /**
@@ -40,9 +44,10 @@ Règles absolues :
  */
 export function buildConversationSystemPrompt(answeredCount: number): string {
   if (answeredCount >= QUESTION_THEMES.length) {
-    return `${PERSONA}
+    return `${PERSONA_BASE}
 
-L'entretien est terminé : tu as toutes les réponses dont tu as besoin. Réagis brièvement et chaleureusement à la dernière réponse de la personne, puis remercie-la en lui disant que tu en sais assez pour imaginer sa maison. NE pose AUCUNE nouvelle question.`
+L'entretien est terminé : tu as toutes les réponses dont tu as besoin. Réagis brièvement et chaleureusement à la dernière réponse de la personne, puis remercie-la en lui disant que tu en sais assez pour imaginer sa maison.
+INTERDICTION ABSOLUE : tu ne poses AUCUNE question, d'aucune sorte — ni curiosité, ni « dernière question », ni proposition. Ton message ne contient AUCUN point d'interrogation. Tu conclus, c'est tout.`
   }
 
   // Safe: the guard above guarantees answeredCount is a valid index here.
