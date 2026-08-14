@@ -23,12 +23,14 @@ export function hashSitePassword(plaintext: string): string {
  * - the unlock endpoint itself (chicken-and-egg)
  * - Nuxt build assets (served once the SPA shell loads, after unlock)
  * - favicon (browsers fetch it implicitly on every page)
+ * - robots.txt (must stay public so crawlers can read the Disallow)
  */
 function isExempt(pathname: string): boolean {
   return (
     pathname === '/api/auth'
     || pathname.startsWith('/_nuxt/')
     || pathname === '/favicon.ico'
+    || pathname === '/robots.txt'
   )
 }
 
@@ -123,6 +125,9 @@ const UNLOCK_HTML = `<!DOCTYPE html>
 `
 
 export default defineEventHandler((event) => {
+  // Keep every response out of search indexes, whatever the gate decides below.
+  setResponseHeader(event, 'X-Robots-Tag', 'noindex, nofollow')
+
   const config = useRuntimeConfig(event)
   const sitePassword = config.sitePassword
 
