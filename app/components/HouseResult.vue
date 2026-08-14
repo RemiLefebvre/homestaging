@@ -7,6 +7,16 @@ const materials = computed(() => state.value.brief?.materials ?? [])
 const story = computed(() => state.value.brief?.story ?? [])
 
 const showSaveModal = ref(false)
+
+/** Print the framing-ready A4 poster: image + intent note + story. */
+function onPrint() {
+  if (!state.value.imageUrl) return
+  printPoster({
+    imageUrl: state.value.imageUrl,
+    concept: state.value.concept ?? '',
+    story: story.value,
+  })
+}
 </script>
 
 <template>
@@ -114,6 +124,16 @@ const showSaveModal = ref(false)
         <UIcon name="i-lucide-check" class="h-4 w-4" />
         Valider
       </button>
+      <UButton
+        v-if="state.imageUrl"
+        size="lg"
+        variant="soft"
+        color="neutral"
+        icon="i-lucide-printer"
+        @click="onPrint()"
+      >
+        Imprimer
+      </UButton>
       <UButton
         size="lg"
         variant="soft"
