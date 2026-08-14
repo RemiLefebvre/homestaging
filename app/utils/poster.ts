@@ -78,16 +78,21 @@ ${collectParentFontFaces()}
     color: #1c1c22;
     background: #fff;
   }
-  /* Fixed A4 sheet + overflow:hidden lets fitPosterToPage measure overflow. */
+  /* Fixed A4 sheet + overflow:hidden lets fitPosterToPage measure overflow.
+     --col: single centered column — texts share the exact width of the image,
+     and the column always fills the sheet minus the horizontal padding. */
   .sheet {
+    --pad-x: 26mm;
+    --col: calc(210mm - 2 * var(--pad-x));
     width: 210mm;
     height: 297mm;
-    padding: 10mm 20mm 15mm;
+    padding: 13mm var(--pad-x) 18mm;
     background: #fff;
     display: flex;
     flex-direction: column;
     overflow: hidden;
   }
+  .frame, .texts { width: var(--col); margin-left: auto; margin-right: auto; }
   .frame { display: flex; justify-content: center; margin-bottom: 9mm; }
   /* Square corners + generous size: the render is the hero of the framed print. */
   .frame img {
@@ -95,7 +100,7 @@ ${collectParentFontFaces()}
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 135mm;
+    max-height: var(--col);
     box-shadow: 0 2mm 9mm rgba(24, 24, 27, 0.14);
   }
   /* All text sizes are em-based on .texts so the fit cascade only touches one value. */
@@ -109,7 +114,7 @@ ${collectParentFontFaces()}
     margin-bottom: 3.5mm;
   }
   .concept { margin-bottom: 8mm; }
-  .concept-text { font-size: 1em; line-height: 1.62; color: #27272a; }
+  .concept-text { font-size: 1em; line-height: 1.62; color: #27272a; text-align: justify; }
   .beats { list-style: none; display: flex; flex-direction: column; gap: 4.5mm; }
   .beat { display: flex; gap: 5mm; align-items: baseline; }
   /* FLAA art direction: black & white only — no colored text on the print. */
