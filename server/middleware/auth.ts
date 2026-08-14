@@ -38,12 +38,12 @@ function isExempt(pathname: string): boolean {
  * separate page or worry about asset loading order.
  */
 const UNLOCK_HTML = `<!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Homestaging — Locked</title>
+<title>tamaison — accès privé</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -85,12 +85,12 @@ const UNLOCK_HTML = `<!DOCTYPE html>
 </head>
 <body>
 <main class="card">
-  <h1>Private build</h1>
-  <p>This Homestaging POC is shared privately. Enter the password to continue.</p>
+  <h1>Accès privé</h1>
+  <p>Cette expérience FLAA est partagée sur invitation. Entrez le mot de passe pour continuer.</p>
   <form id="f" autocomplete="off">
-    <input id="p" type="password" name="password" placeholder="Password" autofocus required />
+    <input id="p" type="password" name="password" placeholder="Mot de passe" autofocus required />
     <div class="err" id="e"></div>
-    <button id="b" type="submit">Unlock</button>
+    <button id="b" type="submit">Entrer</button>
   </form>
 </main>
 <script>
@@ -109,9 +109,9 @@ const UNLOCK_HTML = `<!DOCTYPE html>
         body: JSON.stringify({ password: p.value }),
       });
       if (r.ok) { window.location.reload(); return; }
-      e.textContent = 'Wrong password.';
+      e.textContent = 'Mot de passe incorrect.';
     } catch (_) {
-      e.textContent = 'Network error. Try again.';
+      e.textContent = 'Erreur réseau. Réessayez.';
     } finally {
       b.disabled = false;
       p.select();
