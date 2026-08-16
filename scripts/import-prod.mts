@@ -10,10 +10,11 @@
  *   pnpm import:prod --prune --keep=50   # ...keep the newest 50 instead
  *
  * `--prune` archives every targeted render into exports/images/ and verifies
- * the local copy (size diff vs blob) BEFORE deleting anything server-side.
- * Any missing/mismatched local file aborts the whole prune — Blob has no trash.
+ * the local copy (content md5 vs blob etag, size fallback) BEFORE deleting
+ * anything server-side. Any mismatch aborts the whole prune — Blob has no trash.
  */
-import { mkdir, stat, writeFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import process from 'node:process'
 import { list } from '@vercel/blob'
@@ -34,13 +35,17 @@ function parseArgs(argv: string[]): Record<string, string | true> {
 const token = process.env.BLOB_READ_WRITE_TOKEN
 
 /** Public blobs fetch anonymously; private ones (leads/) need the store token. */
-async function fetchBlob(url: string): Promise<Buffer> {
-  let res = await fetch(url)
+async function fetchBlobResponse(url: string, method = 'GET'): Promise<Response> {
+  let res = await fetch(url, { method })
   if (!res.ok && token) {
-    res = await fetch(url, { headers: { authorization: `Bearer ${token}` } })
+    res = await fetch(url, { method, headers: { authorization: `Bearer ${token}` } })
   }
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`)
-  return Buffer.from(await res.arrayBuffer())
+  return res
+}
+
+async function fetchBlob(url: string): Promise<Buffer> {
+  return Buffer.from(await (await fetchBlobResponse(url)).arrayBuffer())
 }
 
 function csvCell(value: string): string {
@@ -99,24 +104,57 @@ async function localSize(path: string): Promise<number> {
   return stat(path).then(s => s.size).catch(() => -1)
 }
 
+async function localMd5(path: string): Promise<string> {
+  return readFile(path).then(buf => createHash('md5').update(buf).digest('hex')).catch(() => '')
+}
+
+const MD5_RE = /^[0-9a-f]{32}$/
+
+function cleanEtag(raw: string | null): string | null {
+  return raw?.replace(/^W\//, '').replaceAll('"', '') || null
+}
+
+async function blobEtag(url: string): Promise<string | null> {
+  return fetchBlobResponse(url, 'HEAD')
+    .then(res => cleanEtag(res.headers.get('etag')))
+    .catch(() => null)
+}
+
+/**
+ * Local copy ⇔ blob content check. The etag is the content MD5 — observed,
+ * not documented — so fall back to a size diff when it doesn't look like one
+ * (multipart uploads) or when the HEAD failed.
+ */
+async function matchesBlob(path: string, s: StaleImage, etag: string | null): Promise<boolean> {
+  if (etag && MD5_RE.test(etag)) return await localMd5(path) === etag
+  return await localSize(path) === s.size
+}
+
 /**
  * Guard rail: every render about to be deleted must exist in exports/images/
- * with the exact blob size before del() fires. Downloads what's missing,
- * re-stats everything after write, and aborts the whole prune on any mismatch.
+ * with content matching the blob before del() fires. Downloads what's missing
+ * or stale, re-reads from disk after write, aborts the whole prune on any mismatch.
  */
 async function archiveAndVerify(stale: StaleImage[]): Promise<void> {
   const imagesDir = resolve('exports/images')
   await mkdir(imagesDir, { recursive: true })
 
+  const etags = new Map<string, string | null>()
+
   for (const s of stale) {
     const name = s.pathname.slice(GENERATED_BLOB_PREFIX.length)
     const path = join(imagesDir, name)
-    if (await localSize(path) === s.size) {
+    let etag = await blobEtag(s.url)
+    if (await matchesBlob(path, s, etag)) {
+      etags.set(s.pathname, etag)
       console.log(`  ✓ déjà archivé ${name}`)
       continue
     }
-    const buf = await fetchBlob(s.url)
+    const res = await fetchBlobResponse(s.url)
+    etag = cleanEtag(res.headers.get('etag')) ?? etag
+    const buf = Buffer.from(await res.arrayBuffer())
     await writeFile(path, buf)
+    etags.set(s.pathname, etag)
     console.log(`  ⬇ archivé ${name} (${buf.length} bytes)`)
   }
 
@@ -124,10 +162,10 @@ async function archiveAndVerify(stale: StaleImage[]): Promise<void> {
   const mismatches: string[] = []
   for (const s of stale) {
     const name = s.pathname.slice(GENERATED_BLOB_PREFIX.length)
-    if (await localSize(join(imagesDir, name)) !== s.size) mismatches.push(name)
+    if (!await matchesBlob(join(imagesDir, name), s, etags.get(s.pathname) ?? null)) mismatches.push(name)
   }
   if (mismatches.length) {
-    console.error(`✋ Prune annulé — copie locale absente ou incomplète pour : ${mismatches.join(', ')}`)
+    console.error(`✋ Prune annulé — copie locale absente ou différente du blob pour : ${mismatches.join(', ')}`)
     console.error('   Rien n\'a été supprimé côté serveur.')
     process.exit(1)
   }

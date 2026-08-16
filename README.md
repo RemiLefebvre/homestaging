@@ -42,7 +42,7 @@ L'app tourne sur http://localhost:3000.
 | `pnpm build` | Build Nuxt, puis copie des binaires libvips pour Vercel (`scripts/copy-libvips.mjs`) |
 | `pnpm typecheck` | Vérification des types (`vue-tsc`) |
 | `pnpm watermark:preview` | Aperçu CLI du filigrane sans passer par l'app (`scripts/watermark-preview.mts`) |
-| `pnpm import:prod` | Télécharge le store Blob (rendus + coordonnées + `leads.csv`) dans `exports/`. `--prune` (avec `--keep=N`, défaut 25) archive d'abord les rendus les plus anciens dans `exports/images/` (vérification de taille), puis les supprime côté serveur — annulation totale si une copie locale manque ; les leads sont conservés (`scripts/import-prod.mts`) |
+| `pnpm import:prod` | Télécharge le store Blob (rendus + coordonnées + `leads.csv`) dans `exports/`. `--prune` (avec `--keep=N`, défaut 25) archive d'abord les rendus les plus anciens dans `exports/images/` (vérification d'intégrité : MD5 contre l'etag du blob, repli taille), puis les supprime côté serveur — annulation totale si une copie locale manque ou diffère ; les leads sont conservés (`scripts/import-prod.mts`) |
 
 ## Variables d'environnement
 
