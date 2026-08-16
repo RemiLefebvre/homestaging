@@ -19,30 +19,40 @@ export const PENDING_BLOB_PREFIX = 'pending/'
 /** Private JSON sidecars holding the contact info of validated houses. */
 export const LEADS_BLOB_PREFIX = 'leads/'
 
-/** Default retention for `pruneImages` (historical MAX_STORED_IMAGES knob). */
+/** Default retention for pruning (historical MAX_STORED_IMAGES knob). */
 const MAX_STORED_IMAGES = Number(process.env.MAX_STORED_IMAGES) || 25
 
-/**
- * On-demand storage cap: delete the oldest renders (+ their gallery thumbnails)
- * beyond `keep`. Keyed off the `generated/` list; the matching thumbnail is found
- * by reusing the same UUID. Leads are NEVER touched — contacts are the value.
- * Not called on save; invoked only by the import script.
- */
-export async function pruneImages(
-  { keep = MAX_STORED_IMAGES }: { keep?: number } = {},
-): Promise<{ deleted: number }> {
-  const { blobs } = await list({ prefix: GENERATED_BLOB_PREFIX, limit: 1000 })
-  if (blobs.length <= keep) return { deleted: 0 }
+export interface StaleImage {
+  pathname: string
+  url: string
+  size: number
+  /** Derived thumbnail path — deleted alongside, never archived (regenerable). */
+  galleryPathname: string
+}
 
-  const stale = [...blobs]
+/**
+ * List the oldest renders beyond `keep`, candidates for deletion. Split from
+ * the actual delete so the import script can archive + verify them locally
+ * first. Leads are NEVER part of this — contacts are the value.
+ */
+export async function listStaleImages(
+  { keep = MAX_STORED_IMAGES }: { keep?: number } = {},
+): Promise<StaleImage[]> {
+  const { blobs } = await list({ prefix: GENERATED_BLOB_PREFIX, limit: 1000 })
+  if (blobs.length <= keep) return []
+
+  return [...blobs]
     .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime())
     .slice(keep)
+    .map((b) => {
+      const id = b.pathname.slice(GENERATED_BLOB_PREFIX.length).replace(/\.[^.]+$/, '')
+      return { pathname: b.pathname, url: b.url, size: b.size, galleryPathname: `${GALLERY_BLOB_PREFIX}${id}.webp` }
+    })
+}
 
-  const toDelete = stale.flatMap((b) => {
-    const id = b.pathname.slice(GENERATED_BLOB_PREFIX.length).replace(/\.[^.]+$/, '')
-    return [b.pathname, `${GALLERY_BLOB_PREFIX}${id}.webp`]
-  })
-
-  await del(toDelete)
+/** Irreversible: Blob has no trash. Callers must have archived `stale` first. */
+export async function deleteImages(stale: StaleImage[]): Promise<{ deleted: number }> {
+  if (!stale.length) return { deleted: 0 }
+  await del(stale.flatMap(s => [s.pathname, s.galleryPathname]))
   return { deleted: stale.length }
 }
