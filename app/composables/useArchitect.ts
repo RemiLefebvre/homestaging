@@ -205,7 +205,14 @@ export function useArchitect() {
     state.value.error = null
     state.value.loading = true
     try {
-      await callApi('/api/house/save', { pendingId: state.value.pendingId, ...form })
+      // Persist the poster text (concept + story) with the lead: it lives only in
+      // client state, and the print shop needs it to rebuild each A4 offline.
+      await callApi('/api/house/save', {
+        pendingId: state.value.pendingId,
+        ...form,
+        concept: state.value.brief?.concept ?? '',
+        story: state.value.brief?.story ?? [],
+      })
       state.value.validated = true
       return true
     } catch (err) {

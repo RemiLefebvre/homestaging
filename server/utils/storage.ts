@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { del, list, put } from '@vercel/blob'
 import sharp from 'sharp'
-import type { LeadForm, StoredLead } from '~~/shared/types/lead'
+import type { LeadForm, PosterContent, StoredLead } from '~~/shared/types/lead'
 import { extensionForMime, validateOutputImage } from './image'
 import { ApiError } from './errors'
 import { GENERATED_BLOB_PREFIX, GALLERY_BLOB_PREFIX, LEADS_BLOB_PREFIX, PENDING_BLOB_PREFIX } from './blob-store'
@@ -51,7 +51,7 @@ export async function savePendingImage(
  */
 export async function promotePendingImage(
   pendingId: string,
-  contact: LeadForm,
+  contact: LeadForm & PosterContent,
 ): Promise<{ imageUrl: string }> {
   const { blobs } = await list({ prefix: `${PENDING_BLOB_PREFIX}${pendingId}`, limit: 1 })
   const pending = blobs[0]

@@ -1,12 +1,12 @@
 import { defineEventHandler, readValidatedBody } from 'h3'
 import { z } from 'zod'
-import { leadFormSchema } from '~~/shared/types/lead'
+import { leadFormSchema, posterContentSchema } from '~~/shared/types/lead'
 import { ApiError, withErrorHandling } from '../../utils/errors'
 import { promotePendingImage } from '../../utils/storage'
 
-const bodySchema = leadFormSchema.extend({
-  pendingId: z.string().uuid(),
-})
+const bodySchema = leadFormSchema
+  .extend({ pendingId: z.string().uuid() })
+  .merge(posterContentSchema)
 
 /**
  * "Valider" action: promote the pending render to a permanent house and store
@@ -19,8 +19,8 @@ export default defineEventHandler(async (event) => {
     if (!parsed.success) {
       throw new ApiError('CONVERSATION_ERROR', 'Body must include { pendingId, firstName, lastName, email }')
     }
-    const { pendingId, firstName, lastName, email } = parsed.data
-    const { imageUrl } = await promotePendingImage(pendingId, { firstName, lastName, email })
+    const { pendingId, firstName, lastName, email, concept, story } = parsed.data
+    const { imageUrl } = await promotePendingImage(pendingId, { firstName, lastName, email, concept, story })
     return { imageUrl }
   })
 })
