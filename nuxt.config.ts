@@ -4,6 +4,12 @@ export default defineNuxtConfig({
   modules: ['@nuxt/ui', '@nuxt/fonts'],
   css: ['~/assets/css/main.css'],
   ssr: false,
+  // Dark par défaut, sans suivre `prefers-color-scheme` du navigateur.
+  // Le toggle de l'AppHeader écrit `preference` en localStorage et prime ensuite.
+  colorMode: {
+    preference: 'dark',
+    fallback: 'dark',
+  },
   runtimeConfig: {
     openRouterApiKey: '',
     openRouterTextModel: 'anthropic/claude-sonnet-4',
