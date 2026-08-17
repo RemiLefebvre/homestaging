@@ -9,8 +9,11 @@ Un POC web qui transforme une courte conversation en une maison sur-mesure : 5 q
 1. L'utilisateur répond à 5 questions ouvertes (`POST /api/conversation`).
 2. Chaque réponse est distillée en parallèle sur un modèle léger (Haiku) en un *fragment* d'ambiance (couleur, matériau, mot) qui alimente un **moodboard** en direct — best-effort, n'interrompt jamais la conversation.
 3. Une fois les 5 réponses données, un *architect prompt* infère un profil de personnalité et un brief architectural (`POST /api/house/brief`).
-4. Le brief sert de prompt à un modèle d'image (`POST /api/house/image`). Le rendu reçoit un **filigrane** (logo de marque) puis est stocké sur Vercel Blob.
-5. La page d'accueil affiche en fond un **jeu fixe d'images** (`app/assets/showcase/`, généré depuis `exports/images` via `pnpm build:showcase`), bundlé par Vite.
+4. Le brief sert de prompt à un modèle d'image (`POST /api/house/image`). Le rendu reçoit les **filigranes** (logos de marque) puis est stocké sur Vercel Blob en `pending/` (temporaire).
+5. En validant, l'utilisateur laisse ses coordonnées (`POST /api/house/save`) : le rendu est promu en `generated/` et un *lead* est écrit avec, en plus du contact, **le texte du poster** (note d'intention + story) — de quoi ré-imprimer l'affiche hors ligne.
+6. **Livrable print** : après l'événement, `pnpm import:prod` puis `pnpm build:posters` produisent un **PDF A4 par lead** à remettre à l'imprimeur.
+
+> La page d'accueil affiche en fond un **jeu fixe d'images** (`app/assets/showcase/`, généré depuis `exports/images` via `pnpm build:showcase`), bundlé par Vite — purement décoratif.
 
 ## Stack
 
@@ -18,8 +21,9 @@ Un POC web qui transforme une courte conversation en une maison sur-mesure : 5 q
 - [Nuxt UI 3](https://ui.nuxt.com/) + Tailwind CSS 4
 - [motion-v](https://motion.dev/) pour les animations
 - [OpenRouter](https://openrouter.ai/) pour les appels LLM et la génération d'images (texte : `anthropic/claude-sonnet-4` ; moodboard : `anthropic/claude-haiku-4.5`)
-- [sharp](https://sharp.pixelplumbing.com/) pour le filigrane et les vignettes de galerie
+- [sharp](https://sharp.pixelplumbing.com/) pour les filigranes, les vignettes et les images de fond (showcase)
 - [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) pour stocker les rendus
+- [Playwright](https://playwright.dev/) (dev only) pour générer les PDF A4 des posters (`pnpm build:posters`)
 - TypeScript strict, [Zod](https://zod.dev/) pour la validation
 
 ## Lancer en local
@@ -42,6 +46,7 @@ L'app tourne sur http://localhost:3000.
 | `pnpm build` | Build Nuxt, puis copie des binaires libvips pour Vercel (`scripts/copy-libvips.mjs`) |
 | `pnpm typecheck` | Vérification des types (`vue-tsc`) |
 | `pnpm watermark:preview` | Aperçu CLI du filigrane sans passer par l'app (`scripts/watermark-preview.mts`) |
+| `pnpm build:showcase` | (Re)génère le jeu d'images de fond de la home : `exports/images/*.png` → WebP dans `app/assets/showcase/` (bundlé par Vite). À relancer quand `exports/images` change (`scripts/build-showcase.mts`) |
 | `pnpm import:prod` | Télécharge le store Blob (rendus + coordonnées + `leads.csv`) dans `exports/`. **Idempotent** : ne réécrit qu'un fichier nouveau ou modifié (compare MD5 contre l'etag du blob, repli taille), donc les mtimes des inchangés ne bougent pas et seul le delta est retéléchargé. `--prune` (avec `--keep=N`, défaut 25) archive d'abord les rendus les plus anciens dans `exports/images/` (même vérification d'intégrité), puis les supprime côté serveur — annulation totale si une copie locale manque ou diffère ; les leads sont conservés (`scripts/import-prod.mts`). Séquence recommandée : `pnpm import:prod` (sauvegarde totale) → check visuel de `exports/` → `--prune` |
 | `pnpm build:posters` | Génère un PDF A4 prêt à imprimer par lead dans `exports/posters/` (Chromium headless via Playwright, mise en page identique à l'app). Lancer `pnpm import:prod` d'abord pour peupler `exports/leads/`. Prérequis une fois : `pnpm exec playwright install chromium` (`scripts/build-posters.mts`). Livrable pour l'imprimeur |
 
@@ -56,16 +61,16 @@ L'app tourne sur http://localhost:3000.
 | `MAX_STORED_IMAGES` | non | Plafond par défaut de l'élagage **manuel** `pnpm import:prod --prune` (défaut : `25`). Il n'y a plus d'élagage automatique à chaque sauvegarde |
 | `NUXT_SITE_PASSWORD` | non | Si défini, l'app est protégée par un mot de passe (`POST /api/auth`). Vide ou absent : accès public |
 
-Les maisons sont stockées sur Vercel Blob — pas dans le repo. Un rendu passe d'abord par `pending/` (temporaire, nettoyé après 1 h s'il n'est pas validé) ; à la validation du formulaire il est promu en `generated/` (pleine résolution) + `gallery/` (vignette WebP), et les coordonnées sont écrites en `leads/{id}-{suffixe}.json` — le store est public, mais le suffixe aléatoire rend l'URL non devinable et elle n'est jamais renvoyée au client (PII).
+Les maisons sont stockées sur Vercel Blob — pas dans le repo. Un rendu passe d'abord par `pending/` (temporaire, nettoyé après 1 h s'il n'est pas validé) ; à la validation du formulaire il est promu en `generated/` (pleine résolution) + `gallery/` (vignette WebP, désormais archivée — la home utilise le jeu statique), et les coordonnées **+ le texte du poster (note d'intention + story)** sont écrites en `leads/{id}-{suffixe}.json` — le store est public, mais le suffixe aléatoire rend l'URL non devinable et elle n'est jamais renvoyée au client (PII).
 
 ## Structure
 
 ```
-app/         # pages, composants, composables Vue
+app/         # pages, composants, composables Vue (+ assets/showcase = fond de la home)
 server/      # endpoints Nitro + utils (openrouter, brief, image, storage, watermark)
 shared/      # types partagés app ↔ server
-scripts/     # copy-libvips (build Vercel), watermark-preview + import-prod (CLI)
-public/      # assets statiques (logo de marque, intérieurs de base)
+scripts/     # copy-libvips (build Vercel) ; watermark-preview, build-showcase, import-prod, build-posters (CLI)
+public/      # assets statiques (logos de marque, favicons)
 ```
 
 ## Déploiement (Vercel)
