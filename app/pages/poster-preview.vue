@@ -75,6 +75,8 @@ const variantKey = ref<keyof typeof VARIANTS>(initialVariant)
 
 const payload = computed<PosterPayload>(() => ({
   imageUrl: imageUrl.value,
+  firstName: 'Camille',
+  lastName: 'Rossignol',
   concept: VARIANTS[variantKey.value]!.concept,
   story: VARIANTS[variantKey.value]!.story,
 }))

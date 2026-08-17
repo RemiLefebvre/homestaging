@@ -3,6 +3,8 @@ import type { StoryBeat } from '~~/shared/types/architect'
 /** Everything the printed poster needs, decoupled from the architect state. */
 export interface PosterPayload {
   imageUrl: string
+  firstName: string
+  lastName: string
   concept: string
   story: readonly Readonly<StoryBeat>[]
 }
@@ -42,10 +44,17 @@ function collectParentFontFaces(): string {
 
 /**
  * Full HTML document of the A4 poster: image on top (kept at its capped
- * format, placed high on the page), then the intent note (always) and the
- * story (as long as it fits — see {@link fitPosterToPage}).
+ * format, placed high on the page), the visitor's name just under it, then the
+ * intent note (always) and the story (as long as it fits — see
+ * {@link fitPosterToPage}).
  */
 export function buildPosterDoc(payload: PosterPayload): string {
+  const fullName = [payload.firstName, payload.lastName]
+    .map(part => part?.trim() ?? '')
+    .filter(Boolean)
+    .join(' ')
+  const signature = fullName ? `<p class="signature">${esc(fullName)}</p>` : ''
+
   const beats = payload.story
     .map((b) => {
       const meaning = b.meaning ? `<em class="beat-meaning">${esc(b.meaning)}.</em> ` : ''
@@ -92,8 +101,20 @@ ${collectParentFontFaces()}
     flex-direction: column;
     overflow: hidden;
   }
-  .frame, .texts { width: var(--col); margin-left: auto; margin-right: auto; }
-  .frame { display: flex; justify-content: center; margin-bottom: 9mm; }
+  .frame, .signature, .texts { width: var(--col); margin-left: auto; margin-right: auto; }
+  /* margin-bottom small: the signature belongs to the image, not to the note below. */
+  .frame { display: flex; justify-content: center; margin-bottom: 4mm; }
+  /* Discreet visitor signature, kept in the B&W art direction. */
+  .signature {
+    text-align: right;
+    font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #71717a;
+    margin-bottom: 9mm;
+  }
   /* Square corners + generous size: the render is the hero of the framed print. */
   .frame img {
     display: block;
@@ -132,6 +153,7 @@ ${collectParentFontFaces()}
 <body>
   <div class="sheet">
     <div class="frame"><img src="${esc(payload.imageUrl)}" alt=""></div>
+    ${signature}
     <div class="texts">
       <section class="concept">
         <p class="label">Note d'intention</p>
