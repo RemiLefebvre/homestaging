@@ -25,23 +25,33 @@ export interface WatermarkConfig {
 }
 
 /**
- * SINGLE PLACE TO TUNE THE WATERMARK.
+ * SINGLE PLACE TO TUNE THE WATERMARKS. Layers are composited in order.
  *
  * Examples:
  *   widthRatio: 0.4          → bigger logo (40% of image width)
  *   position: 'bottom-right' → move it to the lower-right corner
  *   marginRatio: 0.02        → tighter to the edge
  *   opacity: 0.6             → semi-transparent
- *   enabled: false           → turn the watermark off entirely
+ *   enabled: false           → turn that layer off
  */
-export const WATERMARK_CONFIG: WatermarkConfig = {
-  enabled: true,
-  logoFile: 'FLAA_logo.png',
-  widthRatio: 0.68,
-  position: 'top',
-  marginRatio: 0.07,
-  opacity: 1,
-}
+export const WATERMARK_LAYERS: WatermarkConfig[] = [
+  {
+    enabled: true,
+    logoFile: 'FLAA_logo.png',
+    widthRatio: 0.68,
+    position: 'top',
+    marginRatio: 0.07,
+    opacity: 1,
+  },
+  {
+    enabled: true,
+    logoFile: 'Logo_Off__vect.png',
+    widthRatio: 0.12,
+    position: 'bottom-right',
+    marginRatio: 0.03,
+    opacity: 1,
+  },
+]
 
 /** Compute the top/left pixel offset of the logo inside the base image. */
 function computeOffset(
@@ -81,7 +91,7 @@ function computeOffset(
 export async function compositeWatermark(
   imageBuffer: Buffer,
   logoSource: Buffer,
-  config: WatermarkConfig = WATERMARK_CONFIG,
+  config: WatermarkConfig,
 ): Promise<Buffer> {
   const base = sharp(imageBuffer)
   const meta = await base.metadata()
@@ -117,31 +127,34 @@ export async function compositeWatermark(
 }
 
 /**
- * Composite the brand logo onto a generated image (runtime entry point).
+ * Composite the brand logos onto a generated image (runtime entry point).
  *
- * Loads the logo from the bundled `assets:brand` server asset, then delegates
- * to {@link compositeWatermark}.
+ * Loads each layer's logo from the bundled `assets:brand` server asset, then
+ * delegates to {@link compositeWatermark}, layer by layer.
  *
- * Failures are non-fatal: if anything goes wrong (missing asset, decode error),
- * we log and return the original buffer so the user still gets their render.
+ * Failures are non-fatal per layer: a missing asset or decode error logs and
+ * skips that layer, so the user still gets their render (with whatever layers
+ * succeeded so far).
  */
 export async function applyWatermark(
   imageBuffer: Buffer,
-  config: WatermarkConfig = WATERMARK_CONFIG,
+  layers: WatermarkConfig[] = WATERMARK_LAYERS,
 ): Promise<Buffer> {
-  if (!config.enabled) return imageBuffer
-
-  try {
-    const raw = await useStorage('assets:brand').getItemRaw(config.logoFile)
-    if (!raw) {
-      console.error(`[watermark] logo asset not found: ${config.logoFile}`)
-      return imageBuffer
+  let current = imageBuffer
+  for (const layer of layers) {
+    if (!layer.enabled) continue
+    try {
+      const raw = await useStorage('assets:brand').getItemRaw(layer.logoFile)
+      if (!raw) {
+        console.error(`[watermark] logo asset not found: ${layer.logoFile}`)
+        continue
+      }
+      const logoSource = Buffer.isBuffer(raw) ? raw : Buffer.from(raw as ArrayBuffer)
+      current = await compositeWatermark(current, logoSource, layer)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error(`[watermark] layer ${layer.logoFile} failed, skipping: ${msg}`)
     }
-    const logoSource = Buffer.isBuffer(raw) ? raw : Buffer.from(raw as ArrayBuffer)
-    return await compositeWatermark(imageBuffer, logoSource, config)
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error(`[watermark] failed, returning original image: ${msg}`)
-    return imageBuffer
   }
+  return current
 }

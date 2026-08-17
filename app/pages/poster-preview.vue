@@ -13,10 +13,9 @@ useHead({ title: 'Poster preview (dev)' })
 const route = useRoute()
 
 /**
- * Watermarked sample so the preview matches real renders (the FLAA logo is
- * baked into every generated image server-side). Regenerate with:
- * `pnpm watermark:preview public/generated/<file>.png --out public/generated`
- * Override with ?img=<url>.
+ * Watermarked sample so the preview matches real renders (the logos are baked
+ * into every generated image server-side). After changing WATERMARK_LAYERS,
+ * regenerate with `pnpm watermark:preview` (no args). Override with ?img=<url>.
  */
 const DEFAULT_IMG = '/generated/12b42049-f6ac-411f-892a-88badbb280f7.wm.png'
 const imageUrl = computed(() => {

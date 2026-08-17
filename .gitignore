@@ -20,3 +20,4 @@ public/generated/*
 
 # Prod import output (contains contact PII — never commit)
 exports
+.env*
