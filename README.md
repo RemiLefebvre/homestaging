@@ -10,7 +10,7 @@ Un POC web qui transforme une courte conversation en une maison sur-mesure : 5 q
 2. Chaque réponse est distillée en parallèle sur un modèle léger (Haiku) en un *fragment* d'ambiance (couleur, matériau, mot) qui alimente un **moodboard** en direct — best-effort, n'interrompt jamais la conversation.
 3. Une fois les 5 réponses données, un *architect prompt* infère un profil de personnalité et un brief architectural (`POST /api/house/brief`).
 4. Le brief sert de prompt à un modèle d'image (`POST /api/house/image`). Le rendu reçoit un **filigrane** (logo de marque) puis est stocké sur Vercel Blob.
-5. La page d'accueil affiche en fond une **galerie** des maisons générées les plus récentes (`GET /api/gallery`).
+5. La page d'accueil affiche en fond un **jeu fixe d'images** (`app/assets/showcase/`, généré depuis `exports/images` via `pnpm build:showcase`), bundlé par Vite.
 
 ## Stack
 

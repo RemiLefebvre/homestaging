@@ -6,20 +6,10 @@ useHead({ title: 'Dis-moi qui tu es, je construis ta maison' })
 const { state, start, profileWords, quickTest } = useArchitect()
 const isDev = import.meta.dev
 
-// Lazy + non-blocking: the decorative gallery must never delay the hero paint
-// (a cold-start Blob list() would otherwise show a blank page for ~1-2s).
-const { data: gallery, refresh: refreshGallery } = useFetch<{ images: string[] }>('/api/gallery', {
-  lazy: true,
-})
-const galleryImages = computed(() => gallery.value?.images ?? [])
-
-// Refresh the gallery when returning to the intro (e.g. after "Recommencer"),
-// so the freshly generated house shows up without needing a page reload.
-watch(() => state.value.phase, (phase, previous) => {
-  if (phase === 'intro' && previous && previous !== 'intro') {
-    refreshGallery()
-  }
-})
+// Fond décoratif : jeu fixe d'images statiques (WebP bundlés + fingerprintés par Vite).
+const galleryImages = Object.values(
+  import.meta.glob('../assets/showcase/*.webp', { eager: true, query: '?url', import: 'default' }),
+) as string[]
 </script>
 
 <template>
