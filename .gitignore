@@ -13,7 +13,10 @@ dist
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
 
-# Generated images (not committed)
+# Generated images (not committed). La 1re règle attrape les dossiers créés par
+# typo (`--out public/generated.`), la 2e réautorise le vrai dossier.
+public/generated*/
+!public/generated/
 public/generated/*
 !public/generated/.gitkeep
 .vercel
