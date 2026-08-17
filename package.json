@@ -11,7 +11,8 @@
     "typecheck": "nuxt typecheck",
     "watermark:preview": "tsx scripts/watermark-preview.mts",
     "import:prod": "tsx --env-file=.env scripts/import-prod.mts",
-    "build:showcase": "tsx scripts/build-showcase.mts"
+    "build:showcase": "tsx scripts/build-showcase.mts",
+    "build:posters": "tsx scripts/build-posters.mts"
   },
   "dependencies": {
     "@nuxt/ui": "^3.0.0",
@@ -30,6 +31,7 @@
     "@tailwindcss/postcss": "^4.2.3",
     "@types/node": "^22.0.0",
     "autoprefixer": "^10.5.0",
+    "playwright": "^1.62.1",
     "postcss": "^8.5.10",
     "tailwindcss": "^4.2.3",
     "tsx": "^4.19.2",
@@ -42,11 +44,22 @@
       "@vueuse/core": "13.9.0",
       "@vueuse/shared": "13.9.0"
     },
-    "onlyBuiltDependencies": ["sharp"],
+    "onlyBuiltDependencies": [
+      "sharp"
+    ],
     "supportedArchitectures": {
-      "os": ["current", "linux"],
-      "cpu": ["current", "x64"],
-      "libc": ["current", "glibc"]
+      "os": [
+        "current",
+        "linux"
+      ],
+      "cpu": [
+        "current",
+        "x64"
+      ],
+      "libc": [
+        "current",
+        "glibc"
+      ]
     }
   }
 }

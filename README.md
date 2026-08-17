@@ -43,6 +43,7 @@ L'app tourne sur http://localhost:3000.
 | `pnpm typecheck` | Vérification des types (`vue-tsc`) |
 | `pnpm watermark:preview` | Aperçu CLI du filigrane sans passer par l'app (`scripts/watermark-preview.mts`) |
 | `pnpm import:prod` | Télécharge le store Blob (rendus + coordonnées + `leads.csv`) dans `exports/`. `--prune` (avec `--keep=N`, défaut 25) archive d'abord les rendus les plus anciens dans `exports/images/` (vérification d'intégrité : MD5 contre l'etag du blob, repli taille), puis les supprime côté serveur — annulation totale si une copie locale manque ou diffère ; les leads sont conservés (`scripts/import-prod.mts`). Séquence recommandée : `pnpm import:prod` (sauvegarde totale) → check visuel de `exports/` → `--prune` |
+| `pnpm build:posters` | Génère un PDF A4 prêt à imprimer par lead dans `exports/posters/` (Chromium headless via Playwright, mise en page identique à l'app). Lancer `pnpm import:prod` d'abord pour peupler `exports/leads/`. Prérequis une fois : `pnpm exec playwright install chromium` (`scripts/build-posters.mts`). Livrable pour l'imprimeur |
 
 ## Variables d'environnement
 
