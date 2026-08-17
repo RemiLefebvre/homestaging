@@ -27,6 +27,13 @@
     background-color: var(--color-canvas-dark);
     color: #ededf2;
   }
+
+  /* Tailwind v4 a retiré le cursor:pointer par défaut des boutons. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  label[for] {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {
