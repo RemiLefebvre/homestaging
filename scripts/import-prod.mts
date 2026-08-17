@@ -75,20 +75,37 @@ async function importAll(): Promise<void> {
   await mkdir(imagesDir, { recursive: true })
   await mkdir(leadsDir, { recursive: true })
 
+  // Idempotent mirror: only write a file when the local copy differs from the
+  // blob (content md5 vs etag, size fallback). Unchanged files are left untouched
+  // so their mtime stays a reliable "arrived since last import" signal, and we
+  // skip re-downloading the whole store on every run.
   const { blobs: renders } = await list({ prefix: GENERATED_BLOB_PREFIX, limit: 1000 })
+  let imgNew = 0
   for (const b of renders) {
     const name = b.pathname.slice(GENERATED_BLOB_PREFIX.length)
+    const path = join(imagesDir, name)
+    if (await matchesBlob(path, b, await blobEtag(b.url))) continue
     const buf = await fetchBlob(b.url)
-    await writeFile(join(imagesDir, name), buf)
-    console.log(`  ✓ image ${name} (${buf.length} bytes)`)
+    await writeFile(path, buf)
+    imgNew++
+    console.log(`  ⬇ image ${name} (${buf.length} bytes)`)
   }
 
   const { blobs: leadBlobs } = await list({ prefix: LEADS_BLOB_PREFIX, limit: 1000 })
   const rows: StoredLead[] = []
+  let leadNew = 0
   for (const b of leadBlobs) {
     const name = b.pathname.slice(LEADS_BLOB_PREFIX.length) // {uuid}-{suffixe}.json
-    const buf = await fetchBlob(b.url)
-    await writeFile(join(leadsDir, name), buf)
+    const path = join(leadsDir, name)
+    // Every lead still feeds leads.csv; an unchanged one is read from disk (no write).
+    let buf: Buffer
+    if (await matchesBlob(path, b, await blobEtag(b.url))) {
+      buf = await readFile(path)
+    } else {
+      buf = await fetchBlob(b.url)
+      await writeFile(path, buf)
+      leadNew++
+    }
     try {
       rows.push(JSON.parse(buf.toString('utf8')) as StoredLead)
     } catch {
@@ -97,7 +114,10 @@ async function importAll(): Promise<void> {
   }
   await writeFile(resolve('exports/leads.csv'), toCsv(rows))
 
-  console.log(`\n📥 Import : ${renders.length} image(s), ${rows.length} lead(s) → exports/ (+ leads.csv)`)
+  console.log(
+    `\n📥 Import : ${renders.length} image(s) [${imgNew} nouvelle(s)/màj, ${renders.length - imgNew} inchangée(s)], `
+    + `${rows.length} lead(s) [${leadNew} nouveau(x)/màj] → exports/ (+ leads.csv)`,
+  )
 }
 
 async function localSize(path: string): Promise<number> {
@@ -125,9 +145,9 @@ async function blobEtag(url: string): Promise<string | null> {
  * not documented — so fall back to a size diff when it doesn't look like one
  * (multipart uploads) or when the HEAD failed.
  */
-async function matchesBlob(path: string, s: StaleImage, etag: string | null): Promise<boolean> {
+async function matchesBlob(path: string, blob: { size: number }, etag: string | null): Promise<boolean> {
   if (etag && MD5_RE.test(etag)) return await localMd5(path) === etag
-  return await localSize(path) === s.size
+  return await localSize(path) === blob.size
 }
 
 /**
