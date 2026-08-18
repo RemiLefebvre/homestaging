@@ -103,12 +103,16 @@ const showSaveModal = ref(false)
       </ul>
     </Motion>
 
-    <!-- Actions — gone once validated: the thank-you is a dead end that pushes the user to close the tab. -->
-    <div v-if="!state.validated" class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+    <!-- Sticky so the CTA stays reachable through the long result scroll (buried below the fold otherwise).
+         Gone once validated: the thank-you is a dead end that pushes the user to close the tab. -->
+    <div
+      v-if="!state.validated"
+      class="sticky bottom-0 z-20 mt-8 flex items-center justify-center gap-3 pb-[calc(env(safe-area-inset-bottom)+1rem)]"
+    >
       <button
         v-if="state.imageUrl"
         type="button"
-        class="inline-flex items-center gap-2.5 rounded-2xl px-8 py-4 text-lg font-semibold text-white bg-gradient-brand shadow-lg shadow-violet-500/30 hover:scale-[1.03] active:scale-[0.98] transition-all"
+        class="inline-flex flex-1 sm:flex-initial items-center justify-center gap-2.5 rounded-2xl px-8 py-4 text-lg font-semibold text-white bg-gradient-brand shadow-lg shadow-violet-500/30 hover:scale-[1.03] active:scale-[0.98] transition-all"
         @click="showSaveModal = true"
       >
         <UIcon name="i-lucide-check" class="h-5 w-5" />
@@ -121,7 +125,7 @@ const showSaveModal = ref(false)
         icon="i-lucide-rotate-ccw"
         @click="restart()"
       >
-        Recommencer
+        <span class="hidden sm:inline">Recommencer</span>
       </UButton>
     </div>
 
