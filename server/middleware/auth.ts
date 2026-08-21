@@ -169,13 +169,17 @@ export default defineEventHandler((event) => {
   const cookie = getCookie(event, SITE_AUTH_COOKIE)
   if (cookie === hashSitePassword(sitePassword)) return
 
-  setResponseStatus(event, 401)
-
   if (pathname.startsWith('/api/')) {
+    setResponseStatus(event, 401)
     setResponseHeader(event, 'Content-Type', 'application/json')
     return { error: { code: 'UNAUTHORIZED', message: 'Site is password-protected' } }
   }
 
+  // Serve the gate with 200, NOT 401: reputation crawlers (Sophos Intelix,
+  // Proofpoint) read a 401 on a days-old .website domain as an empty/parked
+  // site and flag it malicious. 200 + real event content lets them see a
+  // legitimate page. No protected content leaks — this only ever returns the
+  // gate HTML; the real app stays behind the cookie check above.
   setResponseHeader(event, 'Content-Type', 'text/html; charset=utf-8')
   return UNLOCK_HTML
 })
