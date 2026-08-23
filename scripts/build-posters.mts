@@ -22,7 +22,42 @@ import { chromium } from 'playwright'
 import type { StoredLead } from '../shared/types/lead'
 
 const LEADS_DIR = resolve('exports/leads')
+const IMAGES_DIR = resolve('exports/images')
 const OUT_DIR = resolve('exports/posters')
+
+const MIME_BY_EXT: Record<string, string> = {
+  png: 'image/png',
+  webp: 'image/webp',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+}
+
+/** Basename of the render URL — matches the file the import wrote under exports/images/. */
+function imageFileName(url: string): string {
+  try {
+    return decodeURIComponent(new URL(url).pathname.split('/').pop() ?? '')
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * Embed the render from the local archive as a base64 data URI. The lead's
+ * imageUrl points at the Blob store, which 404s for any render pruned
+ * server-side — reading the local copy keeps posters rebuildable offline.
+ * Returns null if the local file is missing so the caller can warn + fall back.
+ */
+async function localImageDataUri(url: string): Promise<string | null> {
+  const name = imageFileName(url)
+  const mime = MIME_BY_EXT[name.split('.').pop()?.toLowerCase() ?? '']
+  if (!name || !mime) return null
+  try {
+    const buf = await readFile(join(IMAGES_DIR, name))
+    return `data:${mime};base64,${buf.toString('base64')}`
+  } catch {
+    return null
+  }
+}
 
 /** Same font families as the app; requested at the weights @nuxt/fonts uses. */
 const FONT_LINKS = [
@@ -196,6 +231,7 @@ async function main(): Promise<void> {
 
   let ok = 0
   let skippedText = 0
+  let missingImg = 0
   for (const file of files) {
     let lead: StoredLead
     try {
@@ -205,8 +241,11 @@ async function main(): Promise<void> {
       continue
     }
 
+    const localImg = await localImageDataUri(lead.imageUrl)
+    if (!localImg) missingImg++
+
     const data: PosterData = {
-      imageUrl: lead.imageUrl,
+      imageUrl: localImg ?? lead.imageUrl,
       firstName: lead.firstName ?? '',
       lastName: lead.lastName ?? '',
       concept: lead.concept ?? '',
@@ -253,7 +292,7 @@ async function main(): Promise<void> {
       if (overflows() || !(beats && beats.childElementCount)) story.remove();
     })()`)
 
-    const out = join(OUT_DIR, `${slug(data.firstName)}-${slug(data.lastName)}-${idFromImageUrl(data.imageUrl)}.pdf`)
+    const out = join(OUT_DIR, `${slug(data.firstName)}-${slug(data.lastName)}-${idFromImageUrl(lead.imageUrl)}.pdf`)
     await page.pdf({ path: out, printBackground: true, preferCSSPageSize: true })
     ok++
     console.log(`  ✓ ${out.split('/').pop()}`)
@@ -264,6 +303,9 @@ async function main(): Promise<void> {
   console.log(`\n🖨  ${ok} poster(s) PDF → ${OUT_DIR}`)
   if (skippedText) {
     console.warn(`⚠  ${skippedText} lead(s) sans texte (concept/story) — anciens leads d'avant la persistance : image + nom seulement.`)
+  }
+  if (missingImg) {
+    console.warn(`⚠  ${missingImg} poster(s) sans image locale (fallback URL distante, 404 probable si le render a été élagué) — lance \`pnpm import:prod\`.`)
   }
 }
 
