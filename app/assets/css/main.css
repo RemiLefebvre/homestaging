@@ -77,6 +77,37 @@
     border-color: color-mix(in srgb, white 12%, transparent);
   }
 
+  /* Scrim derrière le moodboard : le fil qui défile dessous reste à peine visible.
+     rgba plutôt que color-mix, et pas de backdrop-filter+mask (WebKit iOS
+     découpe mal le blur masqué) : compatible tous navigateurs. */
+  .chat-scrim {
+    background: linear-gradient(
+      to bottom,
+      rgb(250 249 247) 0%,
+      rgb(250 249 247 / 0.88) 60%,
+      transparent 100%
+    );
+  }
+  .dark .chat-scrim {
+    background: linear-gradient(
+      to bottom,
+      rgb(10 10 15) 0%,
+      rgb(10 10 15 / 0.88) 60%,
+      transparent 100%
+    );
+  }
+
+  /* Hauteur plein écran sous le header ; dvh suit la barre d'URL mobile,
+     la ligne vh sert de fallback aux vieux navigateurs. */
+  .h-under-header {
+    height: calc(100vh - 3.5rem);
+    height: calc(100dvh - 3.5rem);
+  }
+  .min-h-under-header {
+    min-height: calc(100vh - 3.5rem);
+    min-height: calc(100dvh - 3.5rem);
+  }
+
   .scrollbar-hide {
     scrollbar-width: none;
     -ms-overflow-style: none;

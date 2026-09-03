@@ -17,14 +17,14 @@ const galleryImages = Object.values(
     <!-- Intro -->
     <section
       v-if="state.phase === 'intro'"
-      class="relative min-h-[calc(100dvh-3.5rem)] overflow-hidden"
+      class="relative min-h-under-header overflow-hidden"
     >
       <WelcomeGallery
         :images="galleryImages"
         class="absolute inset-0 px-4 py-8"
       />
 
-      <div class="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 min-h-[calc(100dvh-3.5rem)] flex flex-col items-center justify-center text-center">
+      <div class="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 min-h-under-header flex flex-col items-center justify-center text-center">
         <Motion
           :initial="{ opacity: 0, y: 16 }"
           :animate="{ opacity: 1, y: 0 }"
@@ -86,7 +86,7 @@ const galleryImages = Object.values(
     <!-- Generation -->
     <section
       v-else-if="state.phase === 'generating'"
-      class="max-w-2xl mx-auto px-4 sm:px-6 h-[calc(100dvh-3.5rem)] relative"
+      class="max-w-2xl mx-auto px-4 sm:px-6 h-under-header relative"
     >
       <div class="absolute inset-4 overflow-hidden rounded-3xl bg-neutral-100/40 dark:bg-neutral-900/40">
         <ProgressOverlay

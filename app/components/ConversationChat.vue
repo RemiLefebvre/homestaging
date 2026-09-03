@@ -7,6 +7,19 @@ const draft = ref('')
 const scroller = ref<HTMLElement | null>(null)
 const inputRef = ref<{ textareaRef?: HTMLTextAreaElement, $el?: HTMLElement } | null>(null)
 
+// Le moodboard flotte au-dessus du fil (qui défile dessous, derrière son scrim) ;
+// le fil prend un padding-top équivalent pour démarrer sous le panneau.
+const panelWrap = ref<HTMLElement | null>(null)
+const panelHeight = ref(0)
+let panelObserver: ResizeObserver | undefined
+onMounted(() => {
+  panelObserver = new ResizeObserver(() => {
+    panelHeight.value = panelWrap.value?.offsetHeight ?? 0
+  })
+  if (panelWrap.value) panelObserver.observe(panelWrap.value)
+})
+onUnmounted(() => panelObserver?.disconnect())
+
 const canSend = computed(() => !state.value.loading && !state.value.complete && draft.value.trim().length > 0)
 
 // UTextarea exposes its underlying <textarea> via `textareaRef`; fall back to a DOM query
@@ -31,27 +44,43 @@ function onKeydown(event: KeyboardEvent) {
   }
 }
 
+function scrollToBottom(behavior: ScrollBehavior = 'smooth') {
+  scroller.value?.scrollTo({ top: scroller.value.scrollHeight, behavior })
+}
+
 // Keep the latest message in view, and bring focus back to the input when the
 // model finishes replying — the `:disabled` on UTextarea drops focus otherwise.
+// panelHeight change le padding-top du fil après coup, d'où sa présence ici.
+// Second scroll différé : le spring des bulles et le padding font encore bouger
+// la hauteur après le premier scrollTo, qui s'arrête alors trop haut.
 watch(
-  () => [state.value.messages.length, state.value.loading] as const,
+  () => [state.value.messages.length, state.value.loading, panelHeight.value] as const,
   async ([, loading]) => {
     await nextTick()
-    scroller.value?.scrollTo({ top: scroller.value.scrollHeight, behavior: 'smooth' })
+    scrollToBottom()
+    // Filet instantané : le smooth peut être gelé (onglet throttlé, retour
+    // d'arrière-plan mobile) ou dépassé par le spring des bulles.
+    setTimeout(() => scrollToBottom('auto'), 450)
     if (!loading && !state.value.complete) focusInput()
   },
 )
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100dvh-3.5rem)]">
+  <div class="relative max-w-4xl mx-auto px-4 sm:px-6 flex flex-col h-under-header">
     <!-- Progress: the house comes together as the palette + moodboard fill up answer by answer. -->
-    <MoodboardPanel :fragments="state.fragments" :total="questionsTotal" />
+    <div ref="panelWrap" class="absolute inset-x-0 top-0 z-10 px-4 sm:px-6 pb-5">
+      <div class="chat-scrim absolute inset-0" aria-hidden="true" />
+      <div class="relative">
+        <MoodboardPanel :fragments="state.fragments" :total="questionsTotal" />
+      </div>
+    </div>
 
     <!-- Conversation thread -->
     <div
       ref="scroller"
       class="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col gap-4 py-2"
+      :style="{ paddingTop: `${panelHeight}px` }"
     >
       <Motion
         v-for="(msg, i) in state.messages"
