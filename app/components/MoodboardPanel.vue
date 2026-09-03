@@ -60,14 +60,15 @@ const done = computed(() => built.value >= props.total)
     </div>
 
     <!-- Moodboard: one card per answer -->
+    <!-- Mobile : rangée scrollable (grid-cols-5 rend les cartes illisibles < sm) -->
     <div
       v-if="built > 0"
-      class="grid grid-cols-5 gap-2"
+      class="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-5 sm:overflow-visible"
     >
       <Motion
         v-for="(frag, i) in fragments"
         :key="i"
-        class="surface-glass rounded-xl p-2.5 flex flex-col gap-1.5 min-w-0"
+        class="surface-glass rounded-xl p-2.5 flex flex-col gap-1.5 min-w-0 w-32 shrink-0 sm:w-auto"
         :initial="{ opacity: 0, y: 10, scale: 0.95 }"
         :animate="{ opacity: 1, y: 0, scale: 1 }"
         :transition="{ type: 'spring', stiffness: 260, damping: 20 }"

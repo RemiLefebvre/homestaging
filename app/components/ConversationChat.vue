@@ -44,7 +44,7 @@ watch(
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100vh-3.5rem)]">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col h-[calc(100dvh-3.5rem)]">
     <!-- Progress: the house comes together as the palette + moodboard fill up answer by answer. -->
     <MoodboardPanel :fragments="state.fragments" :total="questionsTotal" />
 
@@ -127,7 +127,7 @@ watch(
             class="flex-1"
             :rows="1"
             autoresize
-            :ui="{ base: 'px-2 py-2.5 text-sm bg-transparent placeholder:text-neutral-400 dark:placeholder:text-neutral-500' }"
+            :ui="{ base: 'px-2 py-2.5 text-base sm:text-sm bg-transparent placeholder:text-neutral-400 dark:placeholder:text-neutral-500' }"
             :placeholder="state.loading ? 'Patiente un instant…' : 'Ta réponse…'"
             :disabled="state.loading"
             @keydown="onKeydown"
